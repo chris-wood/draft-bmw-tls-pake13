@@ -16,13 +16,11 @@ author:
     name: Laura Bauman
     organization: Apple, Inc.
     email: l_bauman@apple.com
- -
-   ins: S. Menon
+ - ins: S. Menon
    name: Samir Menon
    organization: Apple, Inc.
    email: samir_menon@apple.com
- -
-    ins: C. Wood
+ - ins: C. Wood
     name: Chris Wood
     organization: Apple, Inc.
     email: cawood@apple.com
@@ -50,8 +48,9 @@ informative:
 
 --- abstract
 
-TODO: all of this text is copied from draft-barnes-tls-pake-04
-and needs to be updated.
+TODO: Most of this text is copied from draft-barnes-tls-pake-04
+and is in the process of being updated.
+
 The pre-shared key mechanism available in TLS 1.3 is not suitable
 for usage with low-entropy keys, such as passwords entered by users.
 This document describes an extension that enables the use of
@@ -93,10 +92,13 @@ that can carry data necessary to execute a PAKE.
 
 This extension is generic, in that it can be used to carry key
 exchange information for multiple different PAKEs. We assume that
-the client and server have pre-negotiated a choice of PAKE (and any
-required parameters) in addition to the password itself.  As a first
+prior to the TLS handshake the client and server will both have
+knowledge of the password or PAKE-specific values derived from the 
+password (e.g. augmented PAKEs only require one party to know the
+actual password). The choice of PAKE and any required parameters will 
+be explicitly specified using IANA assigned values. As a first
 case, this document defines a concrete protocol for executing the
-SPAKE2+ PAKE protocol {{!I-D.irtf-cfrg-spake2}}.
+SPAKE2+ PAKE protocol {{!RFC9383}}.
 
 # Terminology
 
@@ -105,17 +107,14 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 document are to be interpreted as described in {{!RFC2119}}.
 
 The mechanisms described in this document also apply to DTLS 1.3
-{{!I-D.ietf-tls-dtls13}}, but for brevity, we will refer only to TLS
+{{!RFC9147}}, but for brevity, we will refer only to TLS
 throughout.
 
 # Setup
 
 In order to use this protocol, a TLS client and server need to have
-pre-provisioned the values required to execute the protocol:
-
-* A choice of PAKE protocol
-* Any parameters required by the PAKE protocol
-* A password (or a derived value as described by the PAKE protocol)
+pre-provisioned a password (or derived values as described by the 
+desired PAKE protocol(s)).
 
 Servers will of course have multiple instances of this configuration
 information for different clients.  Clients may also have multiple
@@ -127,9 +126,15 @@ required parameters.
 
 A client offers to authenticate with PAKE by including a `pake`
 extension in its ClientHello.  The content of this exension is a
-`PAKEClientHello` value, providing a list of identities under which
-the client can authenticate, and for each identity, the client's
-first message from the underlying PAKE protocol.
+`PAKEClientHello` value, providing a list of PAKE/identity pairs 
+under which the client can authenticate, and for each pair, 
+the client's first message for the underlying PAKE protocol.
+
+The inclusion of the `NamedPAKE` field in the `PAKEShare` allows
+implementations to support multiple PAKEs and negotiate which
+to use in the context of the handshake. For instance, if a 
+client knows a password but not which PAKE the server supports
+it could send corresponding PAKEShares for each PAKE.
 
 If a client sends the `pake` extension, then it MAY also send the
 `key_share` and `pre_shared_key` extensions, to allow the server to
@@ -139,9 +144,21 @@ normal TLS ECDH mechanism.  Forward secrecy is provided by the PAKE
 itself.
 
 ~~~~~
+enum {
+    // TODO: names should fully specify parameters. 
+    
+    SPAKE2PLUS_V1 (0xXXXX),
+    OPAQUE_V1 (0xXXXX),
+    ...
+    etc.
+    
+} NamedPAKE;
+
+
 struct {
-    opaque identity<0..2^16-1>;
-    opaque pake_message<1..2^16-1>;
+    NamedPAKE   pake;
+    opaque      identity<0..2^16-1>;
+    opaque      pake_message<1..2^16-1>;
 } PAKEShare;
 
 struct {
@@ -150,12 +167,12 @@ struct {
 ~~~~~
 
 A server that receives a `pake` extension examines the list of
-client shares to see if there is one with an identity the server
-recognizes.  If so, the server may indicate its choice of PAKE
+client shares to see if there is one with a PAKE selection and identity 
+the server recognizes.  If so, the server may indicate its choice of PAKE
 authentication by including a `pake` extension in its
 ServerHello.  The content of this exension is a `PAKEServerHello`
-value, specifying the identity value for the password the server has
-selected, and the server's first message in the PAKE protocol.
+value, specifying the PAKE and identity value for the password 
+the server has selected, and the server's first message in the PAKE protocol.
 
 Use of PAKE authenication is compatible with standard
 certificate-based authentication of both clients and servers.  If a
@@ -215,8 +232,8 @@ forward secrecy.
 Several current PAKE protocols satisfy these requirements, for
 example:
 
-* SPAKE2+ (described below) {{!I-D.irtf-cfrg-spake2}}
-* SPEKE and derivatives such as Dragonfly {{speke}} {{?I-D.harkins-tls-dragonfly}}
+* SPAKE2+ (described below) {{!RFC9383}}
+* SPEKE and derivatives such as Dragonfly {{speke}} {{!RFC7664}}
 * OPAQUE {{opaque}}
 * SRP {{?RFC2945}}
 
@@ -227,7 +244,7 @@ example:
 
 In order to use SPAKE2+, a TLS client and server need to have
 pre-provisioned the values required to execute the SPAKE2+ protocol
-(see Section 3.1 of {{!I-D.irtf-cfrg-spake2}}):
+(see Section 3.1 of {{!RFC9383}}):
 
 * A DH group of order `p*h`, with `p` a large prime, and generator
   `G`
@@ -287,20 +304,20 @@ generate these values dynamically, rather than caching them.
 
 The content of a `pake_message` in a ClientHello is the client's key
 share `T`.  The value `T` is computed as specified in
-{{!I-D.irtf-cfrg-spake2}}, as `T = w*M + X`, where `M` is a fixed
+{{!RFC9383}}, as `T = w*M + X`, where `M` is a fixed
 value for the DH group and `X` is the public key of a fresh DH key
 pair.  The format of the key share `T` is the same as for a
 `KeyShareEntry.key_exchange` value from the same group.
 
 The content of a `pake_message` in a ServerHello is the server's key
 share `S`.  The value `S` is computed as specified in
-{{!I-D.irtf-cfrg-spake2}}, as `S = w*N + Y`, where `N` is a fixed
+{{!RFC9383}}, as `S = w*N + Y`, where `N` is a fixed
 value for the DH group and `Y` is the public key of a fresh DH key
 pair.  The format of the key share `S` is the same as for a
 `KeyShareEntry.key_exchange` value from the same group.
 
 Based on these messages, both the client and server can compute the
-two shared values as specified in {{!I-D.irtf-cfrg-spake2}}.
+two shared values as specified in {{!RFC9383}}.
 
 | Name | Value    | Client          | Server         |
 |:-----|:---------|:----------------|:---------------|
@@ -350,7 +367,7 @@ anything about the correct value.
 For the most part, the security properties of the password-based
 authentication described in this document are the same as those
 described in the Security Considerations of
-{{!I-D.irtf-cfrg-spake2}}.  The TLS Finished MAC provides the key
+{{!RFC9383}}.  The TLS Finished MAC provides the key
 confirmation required for the security of the protocol.  Note that
 all of the elements covered by the example confirmation hash listed
 in that document are also covered by the Finished MAC:
