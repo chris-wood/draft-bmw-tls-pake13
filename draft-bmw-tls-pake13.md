@@ -348,26 +348,32 @@ Many of the security properties of this protocol will derive from
 the PAKE protocol being used.  Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
 
-The mechanism defined in this document does not provide protection
-for the client's identity, in contrast to TLS client authentication
-with certificates.
+If a server doesn't recognize any of the identities supplied by the 
+client in the ClientHello `pake` extension, the server MAY abort the handshake with an 
+"unknown_psk_identity" alert. In this case, the server acts as an oracle
+for identities, in which each handshake allows an attacker 
+to learn whether the server recognizes any of the identities in a set.
 
-TLS servers that offer this mechanism can be used by third party
-attackers as an oracle for two questions:
+Alternatively, if the server wishes to hide the fact that these client
+identities are unrecognized, the server MAY simulate the protocol as 
+if an identity was recognized, but then reject the client's 
+Finished message with a "decrypt_error" alert, as if the password was incorrect.
+This is similar to the procedure outlined in {{?RFC5054}}
 
-1. Whether the server knows about a given identity
-2. Whether the server recognizes a given (identity, password) pair
+To simulate the protocol, the server should:
 
-The former is signaled by whether the server returns a `pake`
-extension.
+* Select a random identity supplied by the client.
+* Include the `pake` extension in its ServerHello, containing a `server_share` with
+the randomly selected `identity` and corresponding `pake`. To generate the `pake_message`,
+the server should select a `w0` uniformly at random from the integers in `[0, p-1]`,
+and then calculate `pake_message` as normal using `w0`.
+* Perform the rest of the protocol as normal. Because `w0` was selected uniformly at random,
+the server will reject the client's Finished message with overwhelming probability.
 
-[[TODO: Similar to https://tools.ietf.org/html/rfc5054#section-2.5.1.3, the server could run through a complete handshake calculation and fail at the end so that the attacker only knows that the identity/password pair is incorrect, but does not know if the identity is recognized or not. This requires that the server can interpret the pake_message and ascertain the associated PAKE algorithm, group parameters, etc., which requires a reworking of some text in this draft as the identity is currently defined as providing a map to said group parameters. This is related to the discussion in the Open Items section.]]
-
-The latter is signaled by whether the connection
-succeeds.  These oracles are all-or-nothing: If the attacker does
-not have the correct identity or password, he does not learn
-anything about the correct value.
-
+A server that performs the simulation of the protocol acts only 
+as an all-or-nothing oracle for whether a given (identity, password) pair
+is correct. If an attacker does not supply a correct pair, 
+they do not learn anything beyond this fact.
 
 ## Security when using SPAKE2+
 
