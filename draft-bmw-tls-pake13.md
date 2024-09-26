@@ -154,7 +154,6 @@ enum {
     
 } NamedPAKE;
 
-
 struct {
     NamedPAKE   pake;
     opaque      identity<0..2^16-1>;
@@ -191,7 +190,7 @@ struct {
 
 Based on the messages exchanged in the ClientHello and ServerHello,
 the client and server execute the specified PAKE protocol to derive
-a shared key.  This key is used as the `ECHD(E)` input to the TLS
+a shared key.  This key is used as the `ECDH(E)` input to the TLS
 1.3 key schedule.
 
 As with client authentication via certificates, the server has not
@@ -209,11 +208,11 @@ must be compatible with the message flow described above.  A
 specification describing the use of a particular PAKE protocol with
 TLS must provide the following details:
 
-* Parameters that must be pre-provisioned
+* A `NamedPAKE` registered value indicating pre-provisioned parameters
 * Content of the `pake_message` field in a ClientHello
 * Content of the `pake_message` field in a ServerHello
 * How the PAKE protocol is executed based on those messages
-* How the outputs are of the PAKE protocol are used to populate the
+* How the outputs of the PAKE protocol are used to populate the
   `PSK` and `ECDH(E)` inputs to the TLS key schedule.
 
 The underlying cryptographic protocol must be compatible with the
@@ -233,7 +232,7 @@ Several current PAKE protocols satisfy these requirements, for
 example:
 
 * SPAKE2+ (described below) {{!RFC9383}}
-* SPEKE and derivatives such as Dragonfly {{speke}} {{!RFC7664}}
+* SPEKE and derivatives such as Dragonfly {{speke}} {{?RFC7664}}
 * OPAQUE {{opaque}}
 * SRP {{?RFC2945}}
 
@@ -244,30 +243,34 @@ example:
 
 In order to use SPAKE2+, a TLS client and server need to have
 pre-provisioned the values required to execute the SPAKE2+ protocol
-(see Section 3.1 of {{!RFC9383}}):
+(see Section 3.1 and Section 4 of {{!RFC9383}}):
 
-* A DH group of order `p*h`, with `p` a large prime, and generator
-  `G`
+* A DH group `G` of order `p*h`, with `p` a large prime, and generator
+  `P`
+* A cryptographic hash algorithm `H`
 * Fixed elements `M` and `N` for the group
-* A hash function `H`
 * A password `pw`
 
 Note that the hash function `H` might be different from the hash
 function associated with the ciphersuite negotiated by the two
 parties.  The hash function `H` MUST be a hash function suitable for
-hashing passwords, e.g., Argon2 or scrypt {{?I-D.irtf-cfrg-argon2}}
+hashing passwords, e.g., Argon2 or scrypt {{?RFC9106}}
 {{?RFC7914}}.
 
-The TLS client and server roles map to the `A` and `B` roles in the
+The TLS client and server roles map to the `Prover` and `Verifier` roles in the
 SPAKE2+ specification, respectively.  The identity of the server is
 the domain name sent in the `server_name` extension of the
 ClientHello message.  The identity of the client is an opaque octet
 string, specified in the `spake2` ClientHello extension, defined
-below.
+below. 
+
+[[TODO: clarify/generalize identity requirements. I don't think it is necessary to require that `server_name` extension matches the server identity.]]
 
 From the shared password, each party computes two shared integers
 `w0` and `w1` by running the following algorithm twice (changing the
 `context` value each time):
+
+[[TODO: generalize for server not knowing password for SPAKE2+?]]
 
 ~~~~~
 struct {
@@ -303,26 +306,28 @@ generate these values dynamically, rather than caching them.
 # Content of the TLS Extensions
 
 The content of a `pake_message` in a ClientHello is the client's key
-share `T`.  The value `T` is computed as specified in
-{{!RFC9383}}, as `T = w*M + X`, where `M` is a fixed
-value for the DH group and `X` is the public key of a fresh DH key
-pair.  The format of the key share `T` is the same as for a
-`KeyShareEntry.key_exchange` value from the same group.
+share `X`.  The value `X` is computed as specified in
+{{!RFC9383}}, as `X = x*P + w0*M`, where `M` is a fixed
+value for the DH group and `x` is selected uniformly at random 
+from the integers in `[0, p-1]`.  The format of the key share 
+`X` is the same as for a `KeyShareEntry.key_exchange` value from 
+the same group.
 
 The content of a `pake_message` in a ServerHello is the server's key
-share `S`.  The value `S` is computed as specified in
-{{!RFC9383}}, as `S = w*N + Y`, where `N` is a fixed
-value for the DH group and `Y` is the public key of a fresh DH key
-pair.  The format of the key share `S` is the same as for a
-`KeyShareEntry.key_exchange` value from the same group.
+share `Y`.  The value `Y` is computed as specified in
+{{!RFC9383}}, as `Y = y*P + w0*N`, where `N` is a fixed
+value for the DH group and `y` is selected uniformly at random 
+from the integers in `[0, p-1]`.  The format of the key share 
+`Y` is the same as for a `KeyShareEntry.key_exchange` value from 
+the same group.
 
 Based on these messages, both the client and server can compute the
 two shared values as specified in {{!RFC9383}}.
 
 | Name | Value    | Client          | Server         |
 |:-----|:---------|:----------------|:---------------|
-| Z    | x\*y\*G  | x\*(S - w0\*N)  | x\*(T - w0\*M) |
-| V    | w1\*y\*G | w1\*(S - w0\*N) | y\*L           |
+| Z    | h\*x\*y\*P  | h\*x\*(Y - w0\*N)  | h\*y\*(X - w0\*M) |
+| V    | h\*w1\*y\*P | h\*w1\*(Y - w0\*N) | h\*y\*L           |
 
 The following value is used as the `(EC)DHE` input to the TLS 1.3
 key schedule:
@@ -330,6 +335,8 @@ key schedule:
 ~~~~~
 K = H(Z || V)
 ~~~~~
+
+[[TODO: should this be `K_main = H(TT)`? where TT is the transcript including Z and V?]]
 
 Here `H` is the hash function corresponding to the TLS cipher suite
 in use and `||` represents concatenation of octet strings.
@@ -372,24 +379,20 @@ confirmation required for the security of the protocol.  Note that
 all of the elements covered by the example confirmation hash listed
 in that document are also covered by the Finished MAC:
 
-* `A`, `B`, and `T` are included via the ClientHello
-* `S` via the ServerHello
-* `K`, and `w` via the TLS key schedule
+* `idProver`, `idVerifier`, and `X` are included via the ClientHello
+* `Y` via the ServerHello
+* `K`, and `w` via the TLS key schedule 
 
-The `x` and `y` values used in the SPAKE2 protocol MUST have the
+[[TODO: align with SPAKE2+ terminology]]
+
+The `x` and `y` values used in the SPAKE2+ protocol MUST have the
 same ephemerality properties as the key shares sent in the
 `key_shares` extension.  In particular, `x` and `y` MUST NOT be
-equal to zero.   This ensures that TLS sessions using SPAKE2 have
+equal to zero.   This ensures that TLS sessions using SPAKE2+ have
 the same forward secrecy properties as sessions using the normal TLS
 (EC)DH mechanism.
 
 # Open Items
-
-## PAKE Algorithm Negotiation
-
-It is possible that a client may know the password to use, but may not know in advance which PAKE protocols(s) a particular server supports. A potential solution to this is similar to TLS1.3 ClientHello `key_share` operation: the client may send an empty `client_shares` vector in its PAKEClientHello extension. The server can then send an HelloRetryRequest indicating which PAKE protocol, and associated group parameters, the client should use. The client then sends another ClientHello that includes `pake_message` in the PAKEClientHello extension calculated using the correct algorithm. This requires definition of a suitable field for transporting PAKE algorithm and group parameters.
-
-As an optimaisation, similar to TLS1.3 key_share operation, the client could guess the PAKE protocol and include a `pake_message` derived from its guess in the initial ClientHello. If the server does not support the selected PAKE protcol (or protocol group parameter, etc.), the server can send an HelloRetryRequest indicating the supported PAKE protocol and group parameters. Note: it is TBD if sending two different `pake_messages` derived from two different protocol and/or group parameters in two different ClientHello messages constitutes a significant attack vector. This needs cryptographic review.
 
 # IANA Considerations
 
@@ -403,3 +406,5 @@ ExtensionType Registry with the following contents:
 [[ RFC EDITOR: Please replace "TBD" in the above table with the
 value assigned by IANA, and replace "XXXX" with the RFC number
 assigned to this document. ]]
+
+[[TODO: add IANA request for the `NamedPake` for SPAKE2+?]]
