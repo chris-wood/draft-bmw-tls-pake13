@@ -349,7 +349,7 @@ the PAKE protocol being used.  Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
 
 If a server doesn't recognize any of the identities supplied by the 
-client in, the server MAY abort the handshake with an 
+client in the ClientHello `pake` extension, the server MAY abort the handshake with an 
 "unknown_psk_identity" alert. In this case, the server acts as an oracle
 for identities, in which each handshake allows an attacker 
 to learn whether the server recognizes any of the identities in a set.
@@ -358,7 +358,7 @@ Alternatively, if the server wishes to hide the fact that these client
 identities are unrecognized, the server MAY simulate the protocol as 
 if an identity was recognized, but then reject the client's 
 Finished message with a "decrypt_error" alert, as if the password was incorrect.
-This is similar to the procedure outlined in {{!RFC5054}}
+This is similar to the procedure outlined in {{?RFC5054}}
 
 To simulate the protocol, the server should:
 
