@@ -21,9 +21,9 @@ author:
    organization: Apple, Inc.
    email: samir_menon@apple.com
  - ins: C. Wood
-    name: Chris Wood
-    organization: Apple, Inc.
-    email: cawood@apple.com
+   name: Chris Wood
+   organization: Apple, Inc.
+   email: cawood@apple.com
 
 informative:
   speke:
@@ -93,9 +93,9 @@ that can carry data necessary to execute a PAKE.
 This extension is generic, in that it can be used to carry key
 exchange information for multiple different PAKEs. We assume that
 prior to the TLS handshake the client and server will both have
-knowledge of the password or PAKE-specific values derived from the 
+knowledge of the password or PAKE-specific values derived from the
 password (e.g. augmented PAKEs only require one party to know the
-actual password). The choice of PAKE and any required parameters will 
+actual password). The choice of PAKE and any required parameters will
 be explicitly specified using IANA assigned values. As a first
 case, this document defines a concrete protocol for executing the
 SPAKE2+ PAKE protocol {{!RFC9383}}.
@@ -113,7 +113,7 @@ throughout.
 # Setup
 
 In order to use this protocol, a TLS client and server need to have
-pre-provisioned a password (or derived values as described by the 
+pre-provisioned a password (or derived values as described by the
 desired PAKE protocol(s)).
 
 Servers will of course have multiple instances of this configuration
@@ -126,13 +126,13 @@ required parameters.
 
 A client offers to authenticate with PAKE by including a `pake`
 extension in its ClientHello.  The content of this exension is a
-`PAKEClientHello` value, providing a list of PAKE/identity pairs 
-under which the client can authenticate, and for each pair, 
+`PAKEClientHello` value, providing a list of PAKE/identity pairs
+under which the client can authenticate, and for each pair,
 the client's first message for the underlying PAKE protocol.
 
 The inclusion of the `NamedPAKE` field in the `PAKEShare` allows
 implementations to support multiple PAKEs and negotiate which
-to use in the context of the handshake. For instance, if a 
+to use in the context of the handshake. For instance, if a
 client knows a password but not which PAKE the server supports
 it could send corresponding PAKEShares for each PAKE.
 
@@ -145,13 +145,13 @@ itself.
 
 ~~~~~
 enum {
-    // TODO: names should fully specify parameters. 
-    
+    // TODO: names should fully specify parameters.
+
     SPAKE2PLUS_V1 (0xXXXX),
     OPAQUE_V1 (0xXXXX),
     ...
     etc.
-    
+
 } NamedPAKE;
 
 struct {
@@ -166,11 +166,11 @@ struct {
 ~~~~~
 
 A server that receives a `pake` extension examines the list of
-client shares to see if there is one with a PAKE selection and identity 
+client shares to see if there is one with a PAKE selection and identity
 the server recognizes.  If so, the server may indicate its choice of PAKE
 authentication by including a `pake` extension in its
 ServerHello.  The content of this exension is a `PAKEServerHello`
-value, specifying the PAKE and identity value for the password 
+value, specifying the PAKE and identity value for the password
 the server has selected, and the server's first message in the PAKE protocol.
 
 Use of PAKE authenication is compatible with standard
@@ -262,7 +262,7 @@ SPAKE2+ specification, respectively.  The identity of the server is
 the domain name sent in the `server_name` extension of the
 ClientHello message.  The identity of the client is an opaque octet
 string, specified in the `spake2` ClientHello extension, defined
-below. 
+below.
 
 [[TODO: clarify/generalize identity requirements. I don't think it is necessary to require that `server_name` extension matches the server identity.]]
 
@@ -308,17 +308,17 @@ generate these values dynamically, rather than caching them.
 The content of a `pake_message` in a ClientHello is the client's key
 share `X`.  The value `X` is computed as specified in
 {{!RFC9383}}, as `X = x*P + w0*M`, where `M` is a fixed
-value for the DH group and `x` is selected uniformly at random 
-from the integers in `[0, p-1]`.  The format of the key share 
-`X` is the same as for a `KeyShareEntry.key_exchange` value from 
+value for the DH group and `x` is selected uniformly at random
+from the integers in `[0, p-1]`.  The format of the key share
+`X` is the same as for a `KeyShareEntry.key_exchange` value from
 the same group.
 
 The content of a `pake_message` in a ServerHello is the server's key
 share `Y`.  The value `Y` is computed as specified in
 {{!RFC9383}}, as `Y = y*P + w0*N`, where `N` is a fixed
-value for the DH group and `y` is selected uniformly at random 
-from the integers in `[0, p-1]`.  The format of the key share 
-`Y` is the same as for a `KeyShareEntry.key_exchange` value from 
+value for the DH group and `y` is selected uniformly at random
+from the integers in `[0, p-1]`.  The format of the key share
+`Y` is the same as for a `KeyShareEntry.key_exchange` value from
 the same group.
 
 Based on these messages, both the client and server can compute the
@@ -348,15 +348,15 @@ Many of the security properties of this protocol will derive from
 the PAKE protocol being used.  Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
 
-If a server doesn't recognize any of the identities supplied by the 
-client in the ClientHello `pake` extension, the server MAY abort the handshake with an 
+If a server doesn't recognize any of the identities supplied by the
+client in the ClientHello `pake` extension, the server MAY abort the handshake with an
 "unknown_psk_identity" alert. In this case, the server acts as an oracle
-for identities, in which each handshake allows an attacker 
+for identities, in which each handshake allows an attacker
 to learn whether the server recognizes any of the identities in a set.
 
 Alternatively, if the server wishes to hide the fact that these client
-identities are unrecognized, the server MAY simulate the protocol as 
-if an identity was recognized, but then reject the client's 
+identities are unrecognized, the server MAY simulate the protocol as
+if an identity was recognized, but then reject the client's
 Finished message with a "decrypt_error" alert, as if the password was incorrect.
 This is similar to the procedure outlined in {{?RFC5054}}
 
@@ -370,9 +370,9 @@ and then calculate `pake_message` as normal using `w0`.
 * Perform the rest of the protocol as normal. Because `w0` was selected uniformly at random,
 the server will reject the client's Finished message with overwhelming probability.
 
-A server that performs the simulation of the protocol acts only 
+A server that performs the simulation of the protocol acts only
 as an all-or-nothing oracle for whether a given (identity, password) pair
-is correct. If an attacker does not supply a correct pair, 
+is correct. If an attacker does not supply a correct pair,
 they do not learn anything beyond this fact.
 
 ## Security when using SPAKE2+
@@ -387,7 +387,7 @@ in that document are also covered by the Finished MAC:
 
 * `idProver`, `idVerifier`, and `X` are included via the ClientHello
 * `Y` via the ServerHello
-* `K`, and `w` via the TLS key schedule 
+* `K`, and `w` via the TLS key schedule
 
 [[TODO: align with SPAKE2+ terminology]]
 
