@@ -28,7 +28,7 @@ Discussion Venues
    at https://mailarchive.ietf.org/arch/browse/tls/.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/baumanl/draft-bmw-tls-pake13.
+   https://github.com/chris-wood/draft-bmw-tls-pake13.
 
 Status of This Memo
 
