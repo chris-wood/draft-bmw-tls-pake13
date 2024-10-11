@@ -45,7 +45,7 @@ DISCLAIMER: This is a work-in-progress draft and has not yet
 seen significant security analysis. It should not be used as a basis
 for building production systems.
 
-In some applications, it is desireable to enable a client and server
+In some applications, it is desirable to enable a client and server
 to authenticate to one another using a low-entropy pre-shared value,
 such as a user-entered password.
 
@@ -202,7 +202,7 @@ struct {
 ~~~~~
 
 The server_share value of this structure is a `PAKEShare`, which echoes
-back the PAKE algoritm chosen, the chosen client and server identity
+back the PAKE algorithm chosen, the chosen client and server identity
 values, and the server's PAKE message generated in response to the client's
 PAKE message.
 
@@ -316,9 +316,10 @@ The "Context" value for SPAKE2+ is "TLS-SPAKE2PLUS_V1". The rest of the values
 needed for the transcript derivation are as configured in {{spake2plus-setup}},
 exchanged over the wire, or computed by client and server.
 
-The client and server use `K_main` as the input to the TLS 1.3 key schedule.
-Specifically, they use it as the `(EC)DHE` input to the key schedule in
-{{Section 7.1 of !TLS13=RFC8446}}, as shown below.
+Using `K_main`, the client and server both compute `confirmP` and `confirmV`
+values (for key confirmation). These are then concatenated and then used as
+input to the TLS 1.3 key schedule. Specifically, they use `confirmP || confirmV`
+as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}}, as shown below.
 
 ~~~
                                     0
@@ -334,8 +335,8 @@ Specifically, they use it as the `(EC)DHE` input to the key schedule in
                               Derive-Secret(., "derived", "")
                                     |
                                     v
-                    K_main -> HKDF-Extract = Handshake Secret
-                    ^^^^^^          |
+    confirmP || confirmV -> HKDF-Extract = Handshake Secret
+    ^^^^^^^^^^^^^^^^^^^^            |
                                     +-----> Derive-Secret(...)
                                     +-----> Derive-Secret(...)
                                     |
