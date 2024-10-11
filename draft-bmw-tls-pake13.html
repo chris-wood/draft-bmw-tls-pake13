@@ -1387,7 +1387,7 @@ Simulating a response is helpful to prevent client enumeration attacks on the
 server's PAKE database; see <a href="#security" class="auto internal xref">Section 7</a>. Otherwise, the server <span class="bcp14">MUST</span> abort
 the protocol with an "illegal_parameter" alert.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.2-3">If there exists a valid PAKE registration, the server indicates its selection
-by including a <code>pake</code> extension in its ServerHello. The content of this exension
+by including a <code>pake</code> extension in its ServerHello. The content of this extension
 is a <code>PAKEServerHello</code> value, specifying the PAKE and identity value for the
 registration record the server has selected, and the server's first message in
 the PAKE protocol. The format of this structure is as follows:<a href="#section-4.2-3" class="pilcrow">¶</a></p>
@@ -1404,7 +1404,7 @@ values, and the server's PAKE message generated in response to the client's
 PAKE message.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
 <p id="section-4.2-6">If a server uses PAKE authentication, then it <span class="bcp14">MUST NOT</span> send an
 extension of type <code>key_share</code>, <code>pre_shared_key</code>, or <code>early_data</code>.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
-<p id="section-4.2-7">Use of PAKE authenication is not compatible with standard
+<p id="section-4.2-7">Use of PAKE authentication is not compatible with standard
 certificate-based authentication of both clients and servers. If use
 of a PAKE is negotiated, then servers <span class="bcp14">MUST NOT</span> include a Certificate or
 CertificateRequest message in the handshake.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
