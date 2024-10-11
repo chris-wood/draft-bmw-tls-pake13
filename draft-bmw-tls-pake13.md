@@ -190,7 +190,7 @@ server's PAKE database; see {{security}}. Otherwise, the server MUST abort
 the protocol with an "illegal_parameter" alert.
 
 If there exists a valid PAKE registration, the server indicates its selection
-by including a `pake` extension in its ServerHello. The content of this exension
+by including a `pake` extension in its ServerHello. The content of this extension
 is a `PAKEServerHello` value, specifying the PAKE and identity value for the
 registration record the server has selected, and the server's first message in
 the PAKE protocol. The format of this structure is as follows:
@@ -209,7 +209,7 @@ PAKE message.
 If a server uses PAKE authentication, then it MUST NOT send an
 extension of type `key_share`, `pre_shared_key`, or `early_data`.
 
-Use of PAKE authenication is not compatible with standard
+Use of PAKE authentication is not compatible with standard
 certificate-based authentication of both clients and servers. If use
 of a PAKE is negotiated, then servers MUST NOT include a Certificate or
 CertificateRequest message in the handshake.
