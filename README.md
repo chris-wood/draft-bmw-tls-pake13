@@ -1,17 +1,17 @@
-# TODO
+# A Password Authenticated Key Exchange Extension for TLS 1.3
 
-This is the working area for the individual Internet-Draft, "TODO".
+This is the working area for the individual Internet-Draft, "A Password Authenticated Key Exchange Extension for TLS 1.3".
 
-* [Editor's Copy](https://christopher-a-wood.github.io/draft-bmw-tls-pake13/#go.draft-bmw-tls-pake13.html)
+* [Editor's Copy](https://baumanl.github.io/draft-bmw-tls-pake13/#go.draft-bmw-tls-pake13.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-bmw-tls-pake13)
 * [Individual Draft](https://datatracker.ietf.org/doc/html/draft-bmw-tls-pake13)
-* [Compare Editor's Copy to Individual Draft](https://christopher-a-wood.github.io/draft-bmw-tls-pake13/#go.draft-bmw-tls-pake13.diff)
+* [Compare Editor's Copy to Individual Draft](https://baumanl.github.io/draft-bmw-tls-pake13/#go.draft-bmw-tls-pake13.diff)
 
 
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/christopher-a-wood/draft-bmw-tls-pake13/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/baumanl/draft-bmw-tls-pake13/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
