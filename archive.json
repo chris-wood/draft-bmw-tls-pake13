@@ -1,0 +1,97 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2024-10-13T01:16:11.472609+00:00",
+  "repo": "chris-wood/draft-bmw-tls-pake13",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOM83jm85-RCkk",
+      "title": "Cleanup based on discussions",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/1",
+      "state": "MERGED",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-10-10T20:02:55Z",
+      "updatedAt": "2024-10-11T10:28:47Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "1debde36975d78814b9c8bc0bd3f1cf6605ed895",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "caw/edits",
+      "headRefOid": "171b12554de1babd31115d65c5a0644459e757aa",
+      "closedAt": "2024-10-11T10:28:47Z",
+      "mergedAt": "2024-10-11T10:28:47Z",
+      "mergedBy": "chris-wood",
+      "mergeCommit": {
+        "oid": "ce996c17c57ed0872bfc9f77ea2f3cd7abd68660"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86Mw-Pz",
+          "commit": {
+            "abbreviatedOid": "0245cd4"
+          },
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-11T00:07:20Z",
+          "updatedAt": "2024-10-11T00:07:20Z",
+          "comments": []
+        }
+      ]
+    }
+  ]
+}
