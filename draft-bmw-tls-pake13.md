@@ -107,7 +107,7 @@ in the TLS handshake.
 ## Client Behavior
 
 To offer support for a PAKE protocol, the client sends a `pake` extension
-in the ClientHello:
+in the ClientHello carrying a `PAKEClientHello` value:
 
 ~~~
 enum {
@@ -135,7 +135,7 @@ struct {
 } PAKEClientHello;
 ~~~~~
 
-The `PAKEClientHello` structure is  a list of PAKE algorithm and
+The `PAKEClientHello` structure is a list of PAKE algorithm and
 identity pairs under which the client can authenticate, and for each
 pair, the client's first message for the underlying PAKE protocol.
 Concretely, these structure fields are defined as follows:
@@ -155,6 +155,10 @@ server_identity
 pake_message
 : The client PAKE message used to initialize the protocol.
 
+The client MUST use the same client identity and server identity
+in each PAKEShare it sends to the server. This is required to
+prevent client enumeration attacks; see {{security}}.
+
 The `NamedPAKE` field in the `PAKEShare` allows implementations to
 support multiple PAKEs and negotiate which to use in the context of
 the handshake. For instance, if a client knows a password but not which
@@ -163,12 +167,12 @@ PAKE.
 
 If a client sends the `pake` extension, then it MAY also send the
 `key_share` and `pre_shared_key` extensions, to allow the server to
-choose an authentication mode.  Unlike PSK-based authentication,
+choose an authentication mode. Unlike PSK-based authentication,
 however, authentication with PAKE cannot be combined with the
-normal TLS key exchange mechanism. Forward secrecy is provided by the PAKE
-itself.
+normal TLS key exchange mechanism. Forward secrecy is provided by
+the PAKE itself.
 
-The server identity value(s) provided in the PAKEClientHello structure
+The server identity value provided in the PAKEClientHello structure
 are disjoint from that which the client may provide in the
 ServerNameIndication (SNI) field.
 
@@ -179,15 +183,18 @@ if it is well-formed. In particular, if there are duplicate PAKEShare values
 in the PAKEClientHello structure, where a duplicate is defined as two
 PAKEShare values that share the same NamedPAKE, client identity,
 and server identity values, the server aborts the handshake with an
-"illegal_parameter" alert.
+"illegal_parameter" alert. Moreover, if there are different client identity
+or server identity values carried in the PAKEShare values, the `pake`
+extension is considered to be malformed. This check is done to prevent client
+enumeration attacks; see {{security}}.
 
 If the list of PAKEShare values is well-formed, the server then scans the list
 of PAKEShare values to determine if there is one that the server can use
 based on its local database of PAKE registration information. If one does not
-exist, the server can simulate a PAKE response as described in {{simulation}}.
-Simulating a response is helpful to prevent client enumeration attacks on the
-server's PAKE database; see {{security}}. Otherwise, the server MUST abort
-the protocol with an "illegal_parameter" alert.
+exist, the server simulates a PAKE response as described in {{simulation}}.
+Simulating a response prevents client enumeration attacks on the server's
+PAKE database; see {{security}}. Otherwise, the server MUST abort the protocol
+with an "illegal_parameter" alert.
 
 If there exists a valid PAKE registration, the server indicates its selection
 by including a `pake` extension in its ServerHello. The content of this extension
@@ -356,10 +363,27 @@ Note that the client and server do not additionally compute or verify the key
 confirmation messages as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
 
+# Privacy Considerations {#privacy}
+
+Client and server identities are sent in the clear in the PAKEClientHello extension.
+While normally the TLS server identity is already in the clear -- carried in
+the SNI extension -- TLS client identities are encrypted under the TLS handshake
+secrets. Thus, the PAKEClientHello extension reveals more information to a passive
+network attacker than normal, mutually-authenticated TLS handshakes.
+
+The implications of leaking the client identity to a passive network attacker vary.
+For instance, a successful TLS handshake after negotiating use of a PAKE indicates
+that the chosen client identity is valid. This is relevant in settings where
+client enumeration may be a concern.
+
+Applications for which this leak is a problem can use the TLS Encrypted ClientHello
+(ECH) extension to encrypt the PAKEClientHello extension in transit to the server
+{{?ECH=I-D.ietf-tls-esni}}.
+
 # Security Considerations {#security}
 
 Many of the security properties of this protocol will derive from
-the PAKE protocol being used.  Security considerations for PAKE
+the PAKE protocol being used. Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
 
 If a server doesn't recognize any of the identities supplied by the
