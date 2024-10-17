@@ -342,8 +342,8 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                               Derive-Secret(., "derived", "")
                                     |
                                     v
-    confirmP || confirmV -> HKDF-Extract = Handshake Secret
-    ^^^^^^^^^^^^^^^^^^^^            |
+                  K_shared -> HKDF-Extract = Handshake Secret
+                  ^^^^^^^^          |
                                     +-----> Derive-Secret(...)
                                     +-----> Derive-Secret(...)
                                     |
