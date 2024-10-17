@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-15T00:16:57.778109+00:00",
+  "timestamp": "2024-10-17T00:16:50.905602+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -92,6 +92,35 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOM83jm85-y2Qn",
+      "title": "Cleanup",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/2",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "menonsamir",
+        "baumanl"
+      ],
+      "labels": [],
+      "body": "Mandate protocol simulation and fixup some other things.",
+      "createdAt": "2024-10-16T09:00:50Z",
+      "updatedAt": "2024-10-16T09:01:08Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "7efdd7a622e45cf84b06b874db5beacf8d7bd6df",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "caw/cleanup",
+      "headRefOid": "a76cd4952fd529c71395ac021a81d16a8c0a95eb",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
