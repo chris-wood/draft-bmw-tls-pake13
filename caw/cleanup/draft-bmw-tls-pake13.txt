@@ -5,8 +5,8 @@
 Network Working Group                                          L. Bauman
 Internet-Draft                                                  S. Menon
 Intended status: Informational                                C. A. Wood
-Expires: 19 April 2025                                       Apple, Inc.
-                                                         16 October 2024
+Expires: 20 April 2025                                       Apple, Inc.
+                                                         17 October 2024
 
 
       A Password Authenticated Key Exchange Extension for TLS 1.3
@@ -45,7 +45,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 April 2025.
+   This Internet-Draft will expire on 20 April 2025.
 
 Copyright Notice
 
@@ -407,8 +407,8 @@ Table of Contents
                                  Derive-Secret(., "derived", "")
                                        |
                                        v
-       confirmP || confirmV -> HKDF-Extract = Handshake Secret
-       ^^^^^^^^^^^^^^^^^^^^            |
+                     K_shared -> HKDF-Extract = Handshake Secret
+                     ^^^^^^^^          |
                                        +-----> Derive-Secret(...)
                                        +-----> Derive-Secret(...)
                                        |
