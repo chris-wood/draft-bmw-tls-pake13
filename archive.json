@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-10T00:17:45.863905+00:00",
+  "timestamp": "2024-11-12T00:16:14.774903+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -73,6 +73,54 @@
           "updatedAt": "2024-11-07T16:36:05Z"
         }
       ]
+    },
+    {
+      "number": 4,
+      "id": "I_kwDOM83jm86d-G2o",
+      "title": "State properties required for PAKES used",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/4",
+      "state": "OPEN",
+      "author": "menonsamir",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From IETF discussion with @BjoernMHaase and @FrankXL:\r\n\r\nWe should state explicitly what properties a PAKE must have to be eligible for use under this extension (and registered as a NamedPAKE).\r\n\r\nThe main one we've discussed so far is that the PAKE should be compatible with performing key confirmation through the standard TLS 1.3 Finished message.",
+      "createdAt": "2024-11-11T20:17:11Z",
+      "updatedAt": "2024-11-11T20:17:11Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOM83jm86d-Jh8",
+      "title": "Check interactions with other TLS 1.3 features",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/5",
+      "state": "OPEN",
+      "author": "menonsamir",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nWe should ensure there aren't unexpected or confusing interactions between our proposal and other TLS features.\r\n\r\nThe main example brought up so far was resumption tickets. @BjoernMHaase, can you add more detail on your thoughts for those? Thanks!",
+      "createdAt": "2024-11-11T20:25:03Z",
+      "updatedAt": "2024-11-11T20:25:03Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOM83jm86d-LPB",
+      "title": "Clarify client + server identity negotiation",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/6",
+      "state": "OPEN",
+      "author": "menonsamir",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nThere were several requests to clarify the purpose of client and server identities, and suggestions on how they should be negotiated.\r\n\r\nSeveral overlapping ideas have been suggested so far:\r\n- Make identities PAKE-specific, so that different PAKEs can treat them differently (@BjoernMHaase)\r\n- It's enough to make identities optional, as the draft currently does (@menonsamir)\r\n- Make the client identity set in the ClientHello, the server identity \u2018requested\u2019 in the ClientHello, and the server + client identity \u2018selected\u2019 in the ServerHello (@bifurcation)\r\n\r\nLet's kick off discussion on this topic here.",
+      "createdAt": "2024-11-11T20:29:22Z",
+      "updatedAt": "2024-11-11T20:29:22Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
