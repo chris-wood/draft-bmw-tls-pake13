@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-12T00:16:14.774903+00:00",
+  "timestamp": "2024-11-14T00:16:29.230056+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -62,7 +62,7 @@
       "labels": [],
       "body": "\r\n\r\n\r\n>Hi Chris, \r\n>\r\n>thank you for again starting an effort for having PAKE integrated within TLS. I appreciate that.\r\n>\r\n>Hi Laura and Samir,\r\n>\r\n>with this mail I\u2019d like to establish the contact to you and offer support with getting things further here.\r\n>\r\n>\r\n>I have just had a very first look at your draft when sitting in some meetings in IETF121. I am having the following preliminary feedback:\r\n>\r\n>- I think that we will have to clarify on what client and server are to have included in their respective messages. I see the issue with >your draft that while the client will be able to include its client identity it might not be having a server identity value available when >starting the protocol. I.e. the client will not be able in practice to provide the structure that you currently specify:\r\n>\r\n>  struct {\r\n>       NamedPAKE   named_pake;\r\n>       opaque      client_identity<0..2^16-1>;\r\n>       opaque      server_identity<0..2^16-1>;\r\n>       opaque      pake_message<1..2^16-1>;\r\n>   } PAKEShare;\r\n>\r\n>Instead I see the need that the mechanism is as follows: The client transmits a client identity field which *may* be empty. The server >includes a server identity field which also *may* be empty.\r\n \r\nThis is exactly what the draft specifies: the client and server identities are optional values on the wire. If they are present for the application, they are included, otherwise they are not. \r\n\r\n>Similarly to the certificate chain validation in a certificate-based authentication protocol we would be having application hooks on >both sides which get the respective remote identity fields and accept or reject a connection request. Probably it would be helpful to >integrate an image on how the TLS core component interfaces with a PAKE software module outside of the TLS core.\r\n> \r\nThis is also specified in the draft, in that the server chooses its password registration record based on the ClientHello PAKE information. If a registration record exists, it attempts to use it for authentication. Otherwise, it does not. \r\n\r\n>- We should be clarifying what the PAKE algorithm specifier named_pake would be including. For symmetric PAKEs there might be >the option to have named_pake specifying the algorithm family (e.g. CPace or SPAKE2) and have a separate specification of the >cipher suite (e.g. group) to be used. I think that for augemented PAKE we will have to make the named_pake ID specify both, the >protocol-type and the cipher suite set used for running the PAKE protocol. This will be necessary because the actual password >verifiers stored by the server will depend not only on the protocol type but also on the cipher suites.\r\n\r\n>My suggestion would be to clarify this property in the draft and to make the named_pake number bundle together both, cipher suite >and protocol type together also for balanced PAKE.\r\n \r\nThis is already specified. The named_pake fully specifies the protocol, e.g., for SPAKE2PLUS_V1 fully specifies the group, hash function, KDF, and MAC algorithms to be used. It is expected that other named_pake values do the same. \r\n\r\n>\u2026. \r\n>\r\n>As a rough idea which will become relevant when drawing the interface image with the message flow between the PAKE module at >the client and at the server and the TLS core will be how to deal with the explicit key confirmation messages. In CPace we have made >a lot of effort for neat integration into TLS by explicitly keeping the key confirmation rounds separate from the PAKE protocol (and >leave it to TLS in the final two messages). This will not be the case for other PAKE constructions.\r\n \r\nIndeed, not every PAKE will be as easy to integrate as CPace or SPAKE2+, but we can cross that bridge when the time comes. If, for example, a PAKE protocol requires its own key confirmation (and cannot use the TLS Finished messages), then that named_pake would have to add a round trip to TLS. While this is undesirable, it\u2019s also not a dealbreaker.\r\n \r\nBest,\r\nChris\r\n\r\n>\u2026\r\n>\r\n>Yours,\r\n>\r\n>Bj\u00f6rn,\r\n\r\n\r\n\r\nP.S.: I hope that you will be accepting such prelimary feedback. Please tell me if you happen to feel spammed with preliminary thoughts like the ones above which have not be thought through to all details and consequences yet. In this case I will try to give you a more comprehensive feedback and not rough ideas as above in the future. \r\nMit freundlichen Gr\u00fc\u00dfen | Best Regards \r\nDr. Bj\u00f6rn Haase \r\n",
       "createdAt": "2024-11-07T16:32:10Z",
-      "updatedAt": "2024-11-07T16:36:07Z",
+      "updatedAt": "2024-11-13T14:01:16Z",
       "closedAt": null,
       "comments": [
         {
@@ -71,6 +71,13 @@
           "body": "\r\nChris, I think that we should probably be having an image where we detail what interface we are\r\nabout to specify. I fear that otherwise we might be having difficulties regarding the abstraction layer\r\n\r\nIMO we should be talking about the interface between a component that I\u2019d be calling \u201cTLS core\u201d\r\nand components that I\u2019d be calling \u201cPAKE adapter\u201d.\r\n\r\n\r\n```\r\n    Client\r\n    -----------------------  ---------------------|\r\n     Application layer      |                     |   \r\n                            |  Client-side        |\r\n    Password           -->  |  TLS PAKE adapter   |\r\n    Client MD          -->  |                     |\r\n                            |  PAKE MSG 1+2  ->-- |\r\n    Server MD          <--  |  PAKE RSP     -<- | |   \r\n    session ID         <--  |  SK        ->-| | | |     \r\n                            |               | | | |     \r\n                             --------- ===========\r\n    IP address + port  -->  |         |           |\r\n                            |   TCP   |    TLS    |\r\n           downlink <--     |         |   core    |\r\n           uplink    -->    |         |           |\r\n    -----------------------  ---------  ---------\r\n\r\n\r\n    Server\r\n    -----------------------  ---------------------|\r\n     Application layer      |                     |   \r\n                            |  Server-side        |\r\n    Password/Verifier  -->  |  TLS PAKE adapter   |\r\n    Server MD          -->  |                     |\r\n                            |  PAKE MSG 1+2  -<-- |\r\n    Client MD          <--  |  PAKE RSP     ->- | |\r\n    session ID         <--  |  SK        ->-| | | |\r\n                            |               | | | |\r\n                             --------- ===========\r\n    IP address + port  <--  |         |           |\r\n                            |   TCP   |    TLS    |\r\n           downlink  -->    |         |   core    |\r\n           uplink    <--    |         |           |\r\n    -----------------------  ---------  ---------\r\n\r\n\r\n```I.e. even if I believe that we should have the PAKE Adapter code be a part\r\nof the TLS library code, I think that for the purpose of software interfaces\r\nin the code and for the purpose of the specification we should consider\r\nthat the TLS library will have an adapter and a core component on both sides.\r\n\r\nIn the scope of the draft I suggest, that one should be specifying the interface that I highlighted\r\nwith double lines \u201c======\u201d .\r\n\r\nIMO we should be specifying what should be done in the TLS core part\r\nand what has to be provided by the PAKE adapters on both sides and in which\r\nsequence.\r\n\r\nWe then would be having a separate block specifying how the PAKE adapter\r\nblocks shall behave for each of the protocols.\r\n\r\nSaying this, at the ======= interface level we should probably not specify\r\non the actual contents within the PAKE message and response semantics\r\nas this might vary with the actual PAKE protocol in some details.\r\n\r\nOn the interface to the application layer I would distinguish between the concept\r\nof client metadata and server metadata and actual data fields within the PAKE\r\nmessages.\r\n\r\n2.) \r\n\r\nI also think that we should be preparing the option of supplying an interface\r\nbetween the TLS core parts and the TLS PAKE adapter parts for giving\r\nthe TLS core component access to a private/public key pair maintained in\r\nthe TLS PAKE adapter component.\r\n\r\nThe reason is that this would help integrating both OPAQUE and would also\r\nallow for re-using the exact same same interface for FIDO2-based two-factor\r\nauthentication (password + TOKEN).\r\n\r\nI.e. one might prepare the interface \u201c===========\u201d such that it is configurable\r\nwhether client and server shall or shall not activate the certificate-based authentication\r\ncomponent present in today\u2019s TLS core implementations or not.\r\n\r\n\r\nYours,\r\n\r\nBj\u00f6rn\r\n",
           "createdAt": "2024-11-07T16:36:05Z",
           "updatedAt": "2024-11-07T16:36:05Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "As discussed, this isn't a software architecture document. It's a protocol specification, and I don't think this sort of information helps the reader or implementer in any way. I'm inclined to close this issue with no action.",
+          "createdAt": "2024-11-13T14:01:15Z",
+          "updatedAt": "2024-11-13T14:01:15Z"
         }
       ]
     },
@@ -86,9 +93,24 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase and @FrankXL:\r\n\r\nWe should state explicitly what properties a PAKE must have to be eligible for use under this extension (and registered as a NamedPAKE).\r\n\r\nThe main one we've discussed so far is that the PAKE should be compatible with performing key confirmation through the standard TLS 1.3 Finished message.",
       "createdAt": "2024-11-11T20:17:11Z",
-      "updatedAt": "2024-11-11T20:17:11Z",
+      "updatedAt": "2024-11-13T14:00:41Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "BjoernMHaase",
+          "authorAssociation": "NONE",
+          "body": "Yes I agree. I don't see any property except for the fact that the last PAKE protocol message needs to only include a key confirmation.\r\n\r\nWe also should be having a security consideration paragraph per protocol with an analysis on how the security analysis of the PAKE protocol is covering the security analysis of the interleaved TLS and PAKE construction.",
+          "createdAt": "2024-11-12T13:09:51Z",
+          "updatedAt": "2024-11-12T13:09:51Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "I don't know if we need to say anything here, since the extension doesn't dictate how the PAKE updates the TLS key schedule. That's left to each named PAKE. For example, it could be the case that, with SPAKE2+, the TLS key schedule is modified with the key confirmation messages (confirm_P or confirm_V), whereas for with CPace the TLS key schedule could be modified with the output shared secret. (I'm not saying that we should do this for SPAKE2+, but using it as an example to show that the _extension_ isn't imposing requirements on the underlying PAKE in this manner.)\r\n\r\nIf anything, the extension restricts the underlying PAKE to one in which client and server negotiate with identities and PAKE messages, but that covers basically anything.",
+          "createdAt": "2024-11-13T14:00:40Z",
+          "updatedAt": "2024-11-13T14:00:40Z"
+        }
+      ]
     },
     {
       "number": 5,
@@ -102,9 +124,17 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nWe should ensure there aren't unexpected or confusing interactions between our proposal and other TLS features.\r\n\r\nThe main example brought up so far was resumption tickets. @BjoernMHaase, can you add more detail on your thoughts for those? Thanks!",
       "createdAt": "2024-11-11T20:25:03Z",
-      "updatedAt": "2024-11-11T20:25:03Z",
+      "updatedAt": "2024-11-12T13:10:51Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "BjoernMHaase",
+          "authorAssociation": "NONE",
+          "body": "Yes. I'd suggest that one digs through all of the subchapters of the full TLS protocol RFC and looks whether we may have to specify something here which may be specific for PAKE protocols.",
+          "createdAt": "2024-11-12T13:10:50Z",
+          "updatedAt": "2024-11-12T13:10:50Z"
+        }
+      ]
     },
     {
       "number": 6,
@@ -118,9 +148,55 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nThere were several requests to clarify the purpose of client and server identities, and suggestions on how they should be negotiated.\r\n\r\nSeveral overlapping ideas have been suggested so far:\r\n- Make identities PAKE-specific, so that different PAKEs can treat them differently (@BjoernMHaase)\r\n- It's enough to make identities optional, as the draft currently does (@menonsamir)\r\n- Make the client identity set in the ClientHello, the server identity \u2018requested\u2019 in the ClientHello, and the server + client identity \u2018selected\u2019 in the ServerHello (@bifurcation)\r\n\r\nLet's kick off discussion on this topic here.",
       "createdAt": "2024-11-11T20:29:22Z",
-      "updatedAt": "2024-11-11T20:29:22Z",
+      "updatedAt": "2024-11-13T14:04:21Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "BjoernMHaase",
+          "authorAssociation": "NONE",
+          "body": "The client identity used for PAKE may actually also contain information that should be kept confidential, such as user names in case of human users.\r\n\r\nIdeally, we should be preparing the option of having an optional method for encryption of such data. However, I believe that we cannot fully cover that on the level of TLS alone. The way to go here might be to have an alternative approach using the EAP option.\r\n",
+          "createdAt": "2024-11-12T13:13:35Z",
+          "updatedAt": "2024-11-12T13:13:35Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "> The client identity used for PAKE may actually also contain information that should be kept confidential, such as user names in case of human users.\r\n\r\nEncrypting the PAKE information is an orthogonal problem, and one that's already solved by ECH, so we don't need to do anything special for that.\r\n\r\nRegarding the identities themselves, I don't think we need to support identity \"negotiation\" as @bifurcation's suggestion seems to hint at. Clients will know what server identity they wish to connect to, as it's the one that was established offline during registration. I think we should keep the identity encoding as-is on the wire, since ultimately it's up to the application to make sense of the identities when authenticating the handshake.",
+          "createdAt": "2024-11-13T14:04:19Z",
+          "updatedAt": "2024-11-13T14:04:19Z"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "I_kwDOM83jm86eFCPP",
+      "title": "Need to consider handshake regarding PBKDF function and transfer of salt values",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/7",
+      "state": "OPEN",
+      "author": "BjoernMHaase",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In practice the benefit of resilience with respect to server compromise of augmented PAKEs can only be obtained when using memory-hard PBKDF functions which will be parametrized by a workload parameter. In our own environment we denote this combined PBKDF + workload parameter with the greek letter of a small \"sigma\".\r\n\r\nThe draft needs to consider this aspect IMO. Also we should prepare that within one application the parametrization of the workload parameter will be changing over time.\r\n\r\nAs the TLS connection between server and client probably should be expected to be the first interconnection between both parties, we will need to have the handshake regarding the PBKDF and its parametrization to be implemented using the client and server hello messages.\r\n\r\nAs a result I suggest to include a separate set of IANA numbers into the pake-specific payload part. A client may start an attempt with a message for a given PBKDF and parametrization but should be prepared to find a different PBKDF parametrization in the server hello message, such that the appropriate procedure of reaction will be a client hello retry and a second server hello.\r\n\r\nIn principle a PBKDF will be requesting also some SALT value. I'd be in favor of allowing PAKE cipher suites to define whether a salt value is also required. A salt value could be made an optional parameter sent alongside with \"sigma\".",
+      "createdAt": "2024-11-12T13:03:07Z",
+      "updatedAt": "2024-11-13T16:42:08Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "I am opposed to this suggestion, for a couple of reasons:\r\n\r\n1. In most cases, clients will know the PBKDF and its parameters to use for a TLS connection, so adding this information to the codepoints doesn't help.\r\n2. In cases where clients do not know this information, they can make a guess at it. If they're wrong, the connection will fail. Alternatively, we could try to recover using some retry flow, as you suggest. However, building in retry mechanics, similar to what ECH supports, is incredibly complex for the sake of an edge case that will almost never exist in practice. I'm pretty firmly against this design.\r\n\r\nI think the right way to solve this problem is for clients to have some way to get the PBKDF parameter set from the server out-of-band, and then have the client use that when establishing the TLS connection. How that's done is very application-specific.",
+          "createdAt": "2024-11-13T14:12:58Z",
+          "updatedAt": "2024-11-13T14:12:58Z"
+        },
+        {
+          "author": "menonsamir",
+          "authorAssociation": "COLLABORATOR",
+          "body": "To add to @chris-wood's point here, from a discussion with @baumanl: \r\n\r\nFor augmented PAKEs, only the *client* needs to know the PBKDF used; the server can (in fact, should) be totally oblivious to which PBKDF was used to ultimately generate the registration record. We already make the registration process totally 'out of band' and up to applications. Therefore, since the choice of PBKDF is not a fact that the client and server need to agree on, it does not belong in the codepoint.\r\n\r\nI believe symmetric PAKEs don't have this problem, since they don't need to use PBKDFs in the first place.",
+          "createdAt": "2024-11-13T16:42:07Z",
+          "updatedAt": "2024-11-13T16:42:07Z"
+        }
+      ]
     }
   ],
   "pulls": [
