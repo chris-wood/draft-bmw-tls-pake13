@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-14T00:16:29.230056+00:00",
+  "timestamp": "2024-11-17T00:18:54.449320+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -270,6 +270,66 @@
       "mergeCommit": {
         "oid": "0207b2f04d237f9fceca966615adfa0a48268de4"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 8,
+      "id": "PR_kwDOM83jm86CFyGa",
+      "title": "Factor out identities from PakeShare",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/8",
+      "state": "OPEN",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Previously had the client and server identity in each PAKEShare in the client hello, but had a requirement that they were all the same (to prevent enumeration attacks). This change factors the identity out to the PAKEClientHello to eliminate the need to check that they are all the same.",
+      "createdAt": "2024-11-15T20:49:17Z",
+      "updatedAt": "2024-11-15T20:56:58Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "0207b2f04d237f9fceca966615adfa0a48268de4",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "lbauman/identity",
+      "headRefOid": "aa00a05f066d75cdb1b9baacb608ed993816133e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@davidben @bob-beck If you agree with this change we'd also like to update the boringssl implementation to match this change.",
+          "createdAt": "2024-11-15T20:55:32Z",
+          "updatedAt": "2024-11-15T20:55:32Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 9,
+      "id": "PR_kwDOM83jm86CF6OY",
+      "title": "update text around value used as input to TLS key sched",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/9",
+      "state": "OPEN",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Text was inconsistent with diagram and implementation. The SPAKE2+ confirmation messages are not computed or involved in the protocol. Instead, K_Shared (which depends on the protocol transcript) is used as input to the ECDHE key schedule and the TLS finished messages are used in place of the SPAKE2+ confirmation messages.",
+      "createdAt": "2024-11-15T21:12:13Z",
+      "updatedAt": "2024-11-15T21:12:24Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "0207b2f04d237f9fceca966615adfa0a48268de4",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "lbauman/key_sched",
+      "headRefOid": "3bfcecc1da7099a49db9e3dc210b624045f298d2",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
