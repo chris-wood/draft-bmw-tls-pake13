@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-21T00:17:42.198737+00:00",
+  "timestamp": "2024-11-24T00:19:06.007173+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -93,7 +93,7 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase and @FrankXL:\r\n\r\nWe should state explicitly what properties a PAKE must have to be eligible for use under this extension (and registered as a NamedPAKE).\r\n\r\nThe main one we've discussed so far is that the PAKE should be compatible with performing key confirmation through the standard TLS 1.3 Finished message.",
       "createdAt": "2024-11-11T20:17:11Z",
-      "updatedAt": "2024-11-13T14:00:41Z",
+      "updatedAt": "2024-11-22T01:00:39Z",
       "closedAt": null,
       "comments": [
         {
@@ -109,6 +109,27 @@
           "body": "I don't know if we need to say anything here, since the extension doesn't dictate how the PAKE updates the TLS key schedule. That's left to each named PAKE. For example, it could be the case that, with SPAKE2+, the TLS key schedule is modified with the key confirmation messages (confirm_P or confirm_V), whereas for with CPace the TLS key schedule could be modified with the output shared secret. (I'm not saying that we should do this for SPAKE2+, but using it as an example to show that the _extension_ isn't imposing requirements on the underlying PAKE in this manner.)\r\n\r\nIf anything, the extension restricts the underlying PAKE to one in which client and server negotiate with identities and PAKE messages, but that covers basically anything.",
           "createdAt": "2024-11-13T14:00:40Z",
           "updatedAt": "2024-11-13T14:00:40Z"
+        },
+        {
+          "author": "WeiGuo-hw",
+          "authorAssociation": "NONE",
+          "body": "As discussed above, a PAKE should be compatible with performing key confirmation through the standard TLS 1.3 Finished message, so do the key confirmation messages of the PAKE not need to compute individually. \r\nFor example, the TLS 1.3 key schedule can be modified with the intermediate session key ISK for CPace and the shared symmetric secret K_main for SPAKE2+, respectively, and the key confirmation of these PAKEs can be achieved by the TLS 1.3 Finished message without computing the PAKEs\u2019 key confirmation messages individually.",
+          "createdAt": "2024-11-21T03:17:33Z",
+          "updatedAt": "2024-11-21T08:47:37Z"
+        },
+        {
+          "author": "BjoernMHaase",
+          "authorAssociation": "NONE",
+          "body": "Hi Chris, Yes I agree with you. The aspect that I wanted to highlight is that for any three-message flow PAKE such as SPAKE2+ or OPAQUE you have something \"interleaved\" where you have two protocols. What I meant is that for the specific PAKE instance with three flows some discussion will become important for demonstrating that the way that this interleaving combination is implemented is not security-relevant. IMO this will boil down to a discussion that the exact way how the explictit key confirmation is carried out is not relevant for the PAKE protocol proof and that the specific construction of the TLS \"finished\" message fullfils the requirements needed for the PAKE protocol's security proof. ",
+          "createdAt": "2024-11-21T20:36:48Z",
+          "updatedAt": "2024-11-21T20:36:48Z"
+        },
+        {
+          "author": "FrankXL",
+          "authorAssociation": "NONE",
+          "body": "> Hi Chris, Yes I agree with you. The aspect that I wanted to highlight is that for any three-message flow PAKE such as SPAKE2+ or OPAQUE you have something \"interleaved\" where you have two protocols. What I meant is that for the specific PAKE instance with three flows some discussion will become important for demonstrating that the way that this interleaving combination is implemented is not security-relevant. IMO this will boil down to a discussion that the exact way how the explictit key confirmation is carried out is not relevant for the PAKE protocol proof and that the specific construction of the TLS \"finished\" message fullfils the requirements needed for the PAKE protocol's security proof.\r\n\r\nfully agree with this point. But do you think we need more consideration and discussion on other potential interleving combination? ",
+          "createdAt": "2024-11-22T01:00:38Z",
+          "updatedAt": "2024-11-22T01:00:38Z"
         }
       ]
     },
@@ -148,7 +169,7 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nThere were several requests to clarify the purpose of client and server identities, and suggestions on how they should be negotiated.\r\n\r\nSeveral overlapping ideas have been suggested so far:\r\n- Make identities PAKE-specific, so that different PAKEs can treat them differently (@BjoernMHaase)\r\n- It's enough to make identities optional, as the draft currently does (@menonsamir)\r\n- Make the client identity set in the ClientHello, the server identity \u2018requested\u2019 in the ClientHello, and the server + client identity \u2018selected\u2019 in the ServerHello (@bifurcation)\r\n\r\nLet's kick off discussion on this topic here.",
       "createdAt": "2024-11-11T20:29:22Z",
-      "updatedAt": "2024-11-13T14:04:21Z",
+      "updatedAt": "2024-11-21T03:18:57Z",
       "closedAt": null,
       "comments": [
         {
@@ -164,6 +185,13 @@
           "body": "> The client identity used for PAKE may actually also contain information that should be kept confidential, such as user names in case of human users.\r\n\r\nEncrypting the PAKE information is an orthogonal problem, and one that's already solved by ECH, so we don't need to do anything special for that.\r\n\r\nRegarding the identities themselves, I don't think we need to support identity \"negotiation\" as @bifurcation's suggestion seems to hint at. Clients will know what server identity they wish to connect to, as it's the one that was established offline during registration. I think we should keep the identity encoding as-is on the wire, since ultimately it's up to the application to make sense of the identities when authenticating the handshake.",
           "createdAt": "2024-11-13T14:04:19Z",
           "updatedAt": "2024-11-13T14:04:19Z"
+        },
+        {
+          "author": "WeiGuo-hw",
+          "authorAssociation": "NONE",
+          "body": "The client identity and server identity do not seem to be PAKE-specific, because they are often specified by the application. For example, when a client wishes to connect to a server through this PAKE extension, the server identity is determined and the client needs to choose one identity that he/she wants to login no matter which PAKE algorithm is used in this connection. Therefore, can the client identity and server identity be regarded as common fields for this PAKE extension.",
+          "createdAt": "2024-11-21T03:18:56Z",
+          "updatedAt": "2024-11-21T03:18:56Z"
         }
       ]
     },
@@ -179,7 +207,7 @@
       "labels": [],
       "body": "In practice the benefit of resilience with respect to server compromise of augmented PAKEs can only be obtained when using memory-hard PBKDF functions which will be parametrized by a workload parameter. In our own environment we denote this combined PBKDF + workload parameter with the greek letter of a small \"sigma\".\r\n\r\nThe draft needs to consider this aspect IMO. Also we should prepare that within one application the parametrization of the workload parameter will be changing over time.\r\n\r\nAs the TLS connection between server and client probably should be expected to be the first interconnection between both parties, we will need to have the handshake regarding the PBKDF and its parametrization to be implemented using the client and server hello messages.\r\n\r\nAs a result I suggest to include a separate set of IANA numbers into the pake-specific payload part. A client may start an attempt with a message for a given PBKDF and parametrization but should be prepared to find a different PBKDF parametrization in the server hello message, such that the appropriate procedure of reaction will be a client hello retry and a second server hello.\r\n\r\nIn principle a PBKDF will be requesting also some SALT value. I'd be in favor of allowing PAKE cipher suites to define whether a salt value is also required. A salt value could be made an optional parameter sent alongside with \"sigma\".",
       "createdAt": "2024-11-12T13:03:07Z",
-      "updatedAt": "2024-11-13T16:42:08Z",
+      "updatedAt": "2024-11-22T18:21:35Z",
       "closedAt": null,
       "comments": [
         {
@@ -195,6 +223,76 @@
           "body": "To add to @chris-wood's point here, from a discussion with @baumanl: \r\n\r\nFor augmented PAKEs, only the *client* needs to know the PBKDF used; the server can (in fact, should) be totally oblivious to which PBKDF was used to ultimately generate the registration record. We already make the registration process totally 'out of band' and up to applications. Therefore, since the choice of PBKDF is not a fact that the client and server need to agree on, it does not belong in the codepoint.\r\n\r\nI believe symmetric PAKEs don't have this problem, since they don't need to use PBKDFs in the first place.",
           "createdAt": "2024-11-13T16:42:07Z",
           "updatedAt": "2024-11-13T16:42:07Z"
+        },
+        {
+          "author": "WeiGuo-hw",
+          "authorAssociation": "NONE",
+          "body": "Hi, Bjoern\r\nIf the salt value is transferred from the server to the client in the ServerHello message during the authentication phase, then the client can only compute its PAKE key exchange information after receiving the salt value from the server, this seems to be incompatible with the standard TLS 1.3 message flows.",
+          "createdAt": "2024-11-21T03:21:03Z",
+          "updatedAt": "2024-11-21T03:21:03Z"
+        },
+        {
+          "author": "WeiGuo-hw",
+          "authorAssociation": "NONE",
+          "body": "Hi, Chris\r\nThe HelloRetryRequest mechanism is already supported in standard TLS 1.3 flows in order to improve the probability of successful handshake, since the server may inform the client of one cipher suite supported by both parties through the HRR message and this guarantees that the restarted handshake will be successful. Assume that the client supports five cipher suites, if without the retry mechanism and the first cipher suite is not supported by the server, then the client has to retry the remaining four cipher suites to connect to the server, which will slow the speed of the connection establishment. Therefore, I think this PAKE extension should support the current HRR mechanism in TLS 1.3.",
+          "createdAt": "2024-11-21T03:22:10Z",
+          "updatedAt": "2024-11-21T03:22:10Z"
+        },
+        {
+          "author": "FrankXL",
+          "authorAssociation": "NONE",
+          "body": "> Hi, Bjoern If the salt value is transferred from the server to the client in the ServerHello message during the authentication phase, then the client can only compute its PAKE key exchange information after receiving the salt value from the server, this seems to be incompatible with the standard TLS 1.3 message flows.\r\n\r\nSince the salt value needs to be saved in server side and sent to client with the pake connection, but waiting for the server to send the salt value is incompatible with the standard process of TLS 1.3, how do you suggest implementing this feature?",
+          "createdAt": "2024-11-21T08:40:03Z",
+          "updatedAt": "2024-11-21T08:56:11Z"
+        },
+        {
+          "author": "FrankXL",
+          "authorAssociation": "NONE",
+          "body": "> Hi, Chris The HelloRetryRequest mechanism is already supported in standard TLS 1.3 flows in order to improve the probability of successful handshake, since the server may inform the client of one cipher suite supported by both parties through the HRR message and this guarantees that the restarted handshake will be successful. Assume that the client supports five cipher suites, if without the retry mechanism and the first cipher suite is not supported by the server, then the client has to retry the remaining four cipher suites to connect to the server, which will slow the speed of the connection establishment. Therefore, I think this PAKE extension should support the current HRR mechanism in TLS 1.3.\r\n\r\nI think two questions need more discussion: 1--Does PBKDF require online negotiation or not? 2 -- If negotiation is required, the clientHello, serverHello, and HRR in the existing TLS 1.3 can be used directly, and I understand that no new complexity is added.",
+          "createdAt": "2024-11-21T08:44:54Z",
+          "updatedAt": "2024-11-21T08:44:54Z"
+        },
+        {
+          "author": "BjoernMHaase",
+          "authorAssociation": "NONE",
+          "body": "Hi to all of you,\r\n\r\nIn my opinion it is an actual use-case that the client actually might not always know beforehand which PBKDF to use. More specifically, the client might know which PBKDF to use but might *not* know which workload parametrization to actually use for a specific account. \r\n\r\nThe reason is that the requirements regarding PBKDF parametrization should be expected to \"rapidly\" change over time. E.g. I expect that standard organizations will update their recommendations for the workload parameter on a yearly basis. At least this has been common in the last years IIRC. For PBKDF such as argon or scrypt the recommended set of workload parameters is constantly changing with the general decrease in computation cost and increased capabilities of HMI devices.\r\n\r\nAlso documents such as https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf recommend to make the workload parameters depend on the actual application settings and give requirements regarding the minimum salt value length to use for password hashes.\r\n\r\n(Similar documents exists in standards behind a paywall for regulated industries, such as e.g. user databases for sensor calibration control for medicament industries, which declare the recommendations in documents such as the above NIST or similar BSI documents mandatory for a given application setting.)\r\n\r\nAs a result I think that we need to be prepared to be dealing with both\r\n- The fact that a PAKE protocol is used in one of the settings where standards such as in the nist publication above will require applications to use a salt value of when hashing passwords.\r\n- The fact that applications might have to work with varying workload parameters for a given PBKDF over time.\r\n\r\nOn the application side the change of a workload parameter and salt value will be implemented when changing a password or newly registering an account. As a result we should foresee that at least during a transition phase there might be more than one set of workload parameters in one specific server's account database.\r\n\r\nWhen doing this, I don't want to impose too much of this complexity on the TLS integration part. I suggest the following approach for integration in TLS 1.3 without adding too much of complexity:\r\n\r\n- As part of the PAKE specific extension fields (i.e. the component which might differ for different PAKE protocol types) we allow that the initial client hello integrates either \r\n   a) an initial best guess regarding the expected joint \"PBKDF and workload parameters\"  combination and salt value together with the required shares for this setting.\r\n   b) provides only information regarding the client identity as the PBKDF and salt values cannot be realistically predicted. \r\n   \r\nIn case that the server detects that \"PBKDF and workload parameters\" or \"salt\" do not match or are empty, a hello retry message is sent specifying which salt value and which actual \"PBKDF + Workload parameter\" to use for the given client identity.\r\n\r\nIn case of the hello retry mechanism the client would then send a modified client hello which will include all required shares for the given PBKDF and salt set.\r\n\r\nWe should not allow any structure change in the client hello except for modifications regarding the \"PBKDF + Workload parameter\" and \"salt value\" set to use.\r\n\r\nIn practice this will result in a 3-message flow for applications which can predict all required information (e.g. PBKDF+Workload = fixed and salt = \"\") and in a 3 + 2 message flow otherwise.\r\n\r\nAs a result, for any augmented PAKE I'd include a \"salt\" value and a joint \"PBKDF+Workload\" code point in the PAKE-specific part of the payload and would allow for a hello-retry if \"PBKDF+Workload\" and \"salt\" value are the only parameter changed as a result of a \"hello retry\" from the server.",
+          "createdAt": "2024-11-21T21:06:14Z",
+          "updatedAt": "2024-11-21T21:06:14Z"
+        },
+        {
+          "author": "BjoernMHaase",
+          "authorAssociation": "NONE",
+          "body": "With respect to the use-case of server databases where there are different PBKDF settings for different users, I believe that an out-of-band mechanism is just not practical. As we are able to implement all of the needed mechanisms within the existing TLS 1.3 architectures I am strongly opposed to mandate an additional OOB mechanism.\r\n\r\nInstead the way would be to allow for more flexible use of EAP within TLS 1.3, which (unlike the suggested HelloRetry mechanism) will likely end up with a compatibility nightmare and dozens of mutually incompatible EAP flavors.\r\n",
+          "createdAt": "2024-11-21T21:28:33Z",
+          "updatedAt": "2024-11-21T21:28:33Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "@BjoernMHaase what you are describing is in fact a tremendous amount of complexity on an otherwise simple protocol. We do not need to negotiate the use of PBKDF parameters any more than we need to negotiate the use of a context string in SPAKE2+: these are known by the application, and applications should be constructed to determine them before the connection starts. I am firmly opposed to specifying the use of HRR, or any retry mechanism, for a protocol that simply does not need it.",
+          "createdAt": "2024-11-21T21:51:42Z",
+          "updatedAt": "2024-11-21T21:51:42Z"
+        },
+        {
+          "author": "FrankXL",
+          "authorAssociation": "NONE",
+          "body": "> @BjoernMHaase what you are describing is in fact a tremendous amount of complexity on an otherwise simple protocol. We do not need to negotiate the use of PBKDF parameters any more than we need to negotiate the use of a context string in SPAKE2+: these are known by the application, and applications should be constructed to determine them before the connection starts. I am firmly opposed to specifying the use of HRR, or any retry mechanism, for a protocol that simply does not need it.\r\n\r\nHi, Chris. A simple confusion, since TLS 1.3 already has sound HRR and retry mechanism, is there any problem directly reuse it for PAKE?",
+          "createdAt": "2024-11-22T01:06:14Z",
+          "updatedAt": "2024-11-22T01:06:14Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "> Hi, Chris. A simple confusion, since TLS 1.3 already has sound HRR and retry mechanism, is there any problem directly reuse it for PAKE?\r\n\r\nYes -- this draft does not negotiate the PAKE using the TLS 1.3 extensions (\"key_share\" and \"supported_groups\"). It uses its own extension, because using a PAKE is orthogonal to using a normal key exchange algorithm. (In other words, as of now, it's not the case that offering a PAKE is done via another \"key_share\" value.)\r\n\r\nBecause these are independent extensions, we don't get HRR \"for free.\" We would need to specify (a) how the PAKE extension relates to the primary key exchange mechanisms in TLS 1.3 and then (b) how it works in conjunction with HRR. This is nothing but added complexity, in my opinion, since any sort of retry behavior can be avoided through other out-of-band, application-dependent means.",
+          "createdAt": "2024-11-22T13:47:50Z",
+          "updatedAt": "2024-11-22T13:47:50Z"
+        },
+        {
+          "author": "menonsamir",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> In my opinion it is an actual use-case that the client actually might not always know beforehand which PBKDF to use. More specifically, the client might know which PBKDF to use but might not know which workload parametrization to actually use for a specific account.\r\n\r\n@BjoernMHaase As I said above, the client independently chose the PBKDF and associated parameters when generating the registration record. If you are asking how clients should remember their own choices, I think that is pretty clearly a client-internal and application-specific concern. Different applications are going to vary on how they do this, and the draft should not specify this, just as it does not specify registration.",
+          "createdAt": "2024-11-22T18:21:33Z",
+          "updatedAt": "2024-11-22T18:21:33Z"
         }
       ]
     }
