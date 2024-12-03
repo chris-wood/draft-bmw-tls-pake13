@@ -385,11 +385,10 @@ Table of Contents
    derivation are as configured in Section 6.1, exchanged over the wire,
    or computed by client and server.
 
-   Using K_main, the client and server both compute confirmP and
-   confirmV values (for key confirmation).  These are then concatenated
-   and then used as input to the TLS 1.3 key schedule.  Specifically,
-   they use confirmP || confirmV as the (EC)DHE input to the key
-   schedule in Section 7.1 of [TLS13], as shown below.
+   Using K_main, the client and server both compute K_shared which is
+   used as input to the TLS 1.3 key schedule.  Specifically, K_shared is
+   used as the (EC)DHE input to the key schedule in Section 7.1 of
+   [TLS13], as shown below.
 
                                        0
                                        |

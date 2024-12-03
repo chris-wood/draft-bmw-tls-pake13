@@ -1571,9 +1571,8 @@ K_main, the root secret in the protocol as described in <span><a href="https://r
 The "Context" value for SPAKE2+ is "TLS-SPAKE2PLUS_V1". The rest of the values
 needed for the transcript derivation are as configured in <a href="#spake2plus-setup" class="auto internal xref">Section 6.1</a>,
 exchanged over the wire, or computed by client and server.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<p id="section-6.2-4">Using <code>K_main</code>, the client and server both compute <code>confirmP</code> and <code>confirmV</code>
-values (for key confirmation). These are then concatenated and then used as
-input to the TLS 1.3 key schedule. Specifically, they use <code>confirmP || confirmV</code>
+<p id="section-6.2-4">Using <code>K_main</code>, the client and server both compute <code>K_shared</code> which is used as
+input to the TLS 1.3 key schedule. Specifically, <code>K_shared</code> is used
 as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-7.1" class="relref">Section 7.1</a> of [<a href="#TLS13" class="cite xref">TLS13</a>]</span>, as shown below.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.2-5">
 <pre>
