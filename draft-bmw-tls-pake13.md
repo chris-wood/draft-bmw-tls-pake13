@@ -38,12 +38,12 @@ password-authenticated key exchange protocols with TLS 1.3.
 
 # Introduction
 
-DISCLAIMER: Most of this text is copied from draft-barnes-tls-pake-04
+DISCLAIMER: Much of this text is copied from {{?FIRST-DRAFT=I-D.barnes-tls-pake}}
 and is in the process of being updated.
 
 DISCLAIMER: This is a work-in-progress draft and has not yet
-seen significant security analysis. It should not be used as a basis
-for building production systems.
+seen significant security analysis. See {{security}} and {{spake2plus-sec}}
+for more information.
 
 In some applications, it is desirable to enable a client and server
 to authenticate to one another using a low-entropy pre-shared value,
@@ -444,3 +444,10 @@ M =
 N =
 03d8bbd6c639c62937b04d997f38c3770719c629d7014d49a24b4f98baa1292b49
 ~~~
+
+# Acknowledgments
+{:numbered="false"}
+
+The authors would like to thank the original authors of {{FIRST-DRAFT}}
+for providing a firm basis for the extension mechanism specified in this
+document.
