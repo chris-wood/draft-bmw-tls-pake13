@@ -319,9 +319,8 @@ The "Context" value for SPAKE2+ is "TLS-SPAKE2PLUS_V1". The rest of the values
 needed for the transcript derivation are as configured in {{spake2plus-setup}},
 exchanged over the wire, or computed by client and server.
 
-Using `K_main`, the client and server both compute `confirmP` and `confirmV`
-values (for key confirmation). These are then concatenated and then used as
-input to the TLS 1.3 key schedule. Specifically, they use `confirmP || confirmV`
+Using `K_main`, the client and server both compute `K_shared` which is used as
+input to the TLS 1.3 key schedule. Specifically, `K_shared` is used
 as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}}, as shown below.
 
 ~~~
