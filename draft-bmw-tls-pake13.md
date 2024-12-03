@@ -39,10 +39,8 @@ password-authenticated key exchange protocols with TLS 1.3.
 # Introduction
 
 DISCLAIMER: Much of this text is copied from {{?FIRST-DRAFT=I-D.barnes-tls-pake}}
-and is in the process of being updated.
-
-DISCLAIMER: This is a work-in-progress draft and has not yet
-seen significant security analysis. See {{security}} and {{spake2plus-sec}}
+and is in the process of being updated. This is a work-in-progress draft and has
+not yet seen significant security analysis. See {{security}} and {{spake2plus-sec}}
 for more information.
 
 In some applications, it is desirable to enable a client and server
@@ -162,7 +160,9 @@ The `NamedPAKE` field in the `PAKEShare` allows implementations to
 support multiple PAKEs and negotiate which to use in the context of
 the handshake. For instance, if a client knows a password but not which
 PAKE the server supports it could send corresponding PAKEShares for each
-PAKE.
+PAKE. If the client sends multiple PAKEShare values, then they MUST
+be sorted in monotonically increasing order by the NamedPAKE value. Moreover,
+the client MUST NOT send more than one PAKEShare with the same NamedPAKE value.
 
 If a client sends the `pake` extension, then it MAY also send the
 `key_share` and `pre_shared_key` extensions, to allow the server to
@@ -178,9 +178,10 @@ ServerNameIndication (SNI) field.
 ## Server Behavior
 
 A server that receives a `pake` extension examines its contents to determine
-if it is well-formed. In particular, if there are duplicate PAKEShare values
-in the PAKEClientHello structure for the same NamedPAKE, the server aborts the
-handshake with an "illegal_parameter" alert.
+if it is well-formed. In particular, if the list of PAKEShare values is not
+sorted in monotonically increasing order by NamedPAKE values, or if there are
+duplicate NamedPAKE entries in this list, the server aborts the handshake with
+an "illegal_parameter" alert.
 
 If the list of PAKEShare values is well-formed, the server then scans the list
 of PAKEShare values to determine if there is one corresponding to a server
