@@ -125,39 +125,38 @@ enum {
 
 struct {
     NamedPAKE   named_pake;
-    opaque      client_identity<0..2^16-1>;
-    opaque      server_identity<0..2^16-1>;
     opaque      pake_message<1..2^16-1>;
 } PAKEShare;
 
 struct {
+    opaque    client_identity<0..2^16-1>;
+    opaque    server_identity<0..2^16-1>;
     PAKEShare client_shares<0..2^16-1>;
 } PAKEClientHello;
 ~~~~~
 
-The `PAKEClientHello` structure is a list of PAKE algorithm and
-identity pairs under which the client can authenticate, and for each
-pair, the client's first message for the underlying PAKE protocol.
+The `PAKEClientHello` structure consists of an identity pair under which the
+client can authenticate alongside a list of PAKE algorithms and the
+client's first message for each underlying PAKE protocol.
 Concretely, these structure fields are defined as follows:
 
 client_shares
 : A list of PAKEShare values, each one with a distinct NamedPAKE algorithm.
 
-named_pake
-: The 2-byte identifier of the PAKE algorithm.
-
 client_identity
-: The client identity used for the PAKE.
+: The client identity used for the PAKE. It may be empty.
 
 server_identity
-: The server identity used for the PAKE.
+: The server identity used for the PAKE. It may be empty.
+
+named_pake
+: The 2-byte identifier of the PAKE algorithm.
 
 pake_message
 : The client PAKE message used to initialize the protocol.
 
-The client MUST use the same client identity and server identity
-in each PAKEShare it sends to the server. This is required to
-prevent client enumeration attacks; see {{security}}.
+The client and server identity fields are common to all PAKEShares to prevent
+client enumeration attacks; see {{security}}.
 
 The `NamedPAKE` field in the `PAKEShare` allows implementations to
 support multiple PAKEs and negotiate which to use in the context of
@@ -180,27 +179,27 @@ ServerNameIndication (SNI) field.
 
 A server that receives a `pake` extension examines its contents to determine
 if it is well-formed. In particular, if there are duplicate PAKEShare values
-in the PAKEClientHello structure, where a duplicate is defined as two
-PAKEShare values that share the same NamedPAKE, client identity,
-and server identity values, the server aborts the handshake with an
-"illegal_parameter" alert. Moreover, if there are different client identity
-or server identity values carried in the PAKEShare values, the `pake`
-extension is considered to be malformed. This check is done to prevent client
-enumeration attacks; see {{security}}.
+in the PAKEClientHello structure for the same NamedPAKE, the server aborts the
+handshake with an "illegal_parameter" alert.
 
 If the list of PAKEShare values is well-formed, the server then scans the list
-of PAKEShare values to determine if there is one that the server can use
-based on its local database of PAKE registration information. If one does not
+of PAKEShare values to determine if there is one corresponding to a server
+supported NamedPAKE. If the server does not support any of the offered NamedPAKEs
+in the client PAKEShares then the server MUST abort the protocol
+with an "illegal_parameter" alert.
+
+If the server has a NamedPAKE in common with the client then the server uses
+the client_identity and server_identity alongside its local database of PAKE
+registration information to determine if the request corresponds to a legitimate
+client registration record. If one does not
 exist, the server simulates a PAKE response as described in {{simulation}}.
 Simulating a response prevents client enumeration attacks on the server's
-PAKE database; see {{security}}. Otherwise, the server MUST abort the protocol
-with an "illegal_parameter" alert.
+PAKE database; see {{security}}.
 
 If there exists a valid PAKE registration, the server indicates its selection
 by including a `pake` extension in its ServerHello. The content of this extension
-is a `PAKEServerHello` value, specifying the PAKE and identity value for the
-registration record the server has selected, and the server's first message in
-the PAKE protocol. The format of this structure is as follows:
+is a `PAKEServerHello` value, specifying the PAKE the server has selected, and the
+server's first message in the PAKE protocol. The format of this structure is as follows:
 
 ~~~~~
 struct {
@@ -209,9 +208,8 @@ struct {
 ~~~~~
 
 The server_share value of this structure is a `PAKEShare`, which echoes
-back the PAKE algorithm chosen, the chosen client and server identity
-values, and the server's PAKE message generated in response to the client's
-PAKE message.
+back the PAKE algorithm chosen and the server's PAKE message generated
+in response to the client's PAKE message.
 
 If a server uses PAKE authentication, then it MUST NOT send an
 extension of type `key_share`, `pre_shared_key`, or `early_data`.
@@ -240,9 +238,9 @@ otherwise be sending data to an unauthenticated client.
 
 To simulate a fake PAKE response, the server does the following:
 
-* Select a random identity supplied by the client.
+* Select a random NamedPAKE supported by the client and server.
 * Include the `pake` extension in its ServerHello, containing a PAKEShare value with
-the randomly selected `identity` and corresponding `pake`. To generate the `pake_message`
+the randomly selected NamedPAKE and corresponding `pake_message`. To generate the `pake_message`
 for this `PAKEShare` value, the server should select a value uniformly at random from
 the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
 this would be a random point on the elliptic curve group.
@@ -308,14 +306,12 @@ as needed for the protocol; see {{Section 4 of SPAKE2PLUS}}.
 ## Protocol Execution {#spake2plus-run}
 
 The content of one PAKEShare value in the PAKEClientHello structure consists
-of the NamedPAKE value `SPAKE2PLUS_V1`, the client and server identities
-the client was configured with, and the value `shareP` as computed in
+of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareP` as computed in
 {{Section 3.3 of SPAKE2PLUS}}.
 
 The content of the server PAKEShare value in the PAKEServerHello structure
-consists of the NamedPAKE value `SPAKE2PLUS_V1` and the client and server
-identities chosen from the PAKEClientHello list of PAKEShare values, as well
-as the value `shareV` as computed in {{Section 3.3 of SPAKE2PLUS}}.
+consists of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareV` as
+computed in {{Section 3.3 of SPAKE2PLUS}}.
 
 Given `shareP` and `shareV`, the client and server can then both compute
 K_main, the root secret in the protocol as described in {{Section 3.4 of SPAKE2PLUS}}.
@@ -386,7 +382,7 @@ Many of the security properties of this protocol will derive from
 the PAKE protocol being used. Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
 
-If a server doesn't recognize any of the identities supplied by the
+If a server doesn't recognize the identity supplied by the
 client in the ClientHello `pake` extension, the server MAY abort the handshake with an
 "illegal_parameter" alert. In this case, the server acts as an oracle
 for identities, in which each handshake allows an attacker
