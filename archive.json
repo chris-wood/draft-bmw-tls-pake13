@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-03T00:19:04.698167+00:00",
+  "timestamp": "2024-12-05T00:18:18.101157+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -100,7 +100,7 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase and @FrankXL:\r\n\r\nWe should state explicitly what properties a PAKE must have to be eligible for use under this extension (and registered as a NamedPAKE).\r\n\r\nThe main one we've discussed so far is that the PAKE should be compatible with performing key confirmation through the standard TLS 1.3 Finished message.",
       "createdAt": "2024-11-11T20:17:11Z",
-      "updatedAt": "2024-11-22T01:00:39Z",
+      "updatedAt": "2024-12-03T15:29:12Z",
       "closedAt": null,
       "comments": [
         {
@@ -137,6 +137,20 @@
           "body": "> Hi Chris, Yes I agree with you. The aspect that I wanted to highlight is that for any three-message flow PAKE such as SPAKE2+ or OPAQUE you have something \"interleaved\" where you have two protocols. What I meant is that for the specific PAKE instance with three flows some discussion will become important for demonstrating that the way that this interleaving combination is implemented is not security-relevant. IMO this will boil down to a discussion that the exact way how the explictit key confirmation is carried out is not relevant for the PAKE protocol proof and that the specific construction of the TLS \"finished\" message fullfils the requirements needed for the PAKE protocol's security proof.\r\n\r\nfully agree with this point. But do you think we need more consideration and discussion on other potential interleving combination? ",
           "createdAt": "2024-11-22T01:00:38Z",
           "updatedAt": "2024-11-22T01:00:38Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "> But do you think we need more consideration and discussion on other potential interleving combination?\r\n\r\nWhy would we consider alternative interleaving mechanisms? Is the current mechanism in some way inadequate?",
+          "createdAt": "2024-12-03T15:28:04Z",
+          "updatedAt": "2024-12-03T15:28:04Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "> Hi Chris, Yes I agree with you. The aspect that I wanted to highlight is that for any three-message flow PAKE such as SPAKE2+ or OPAQUE you have something \"interleaved\" where you have two protocols. What I meant is that for the specific PAKE instance with three flows some discussion will become important for demonstrating that the way that this interleaving combination is implemented is not security-relevant. IMO this will boil down to a discussion that the exact way how the explictit key confirmation is carried out is not relevant for the PAKE protocol proof and that the specific construction of the TLS \"finished\" message fullfils the requirements needed for the PAKE protocol's security proof.\r\n\r\nI don't disagree, but you seem to be simply advocating for some text in the security considerations which argues (or points to external arguments) for why replacing the PAKE-specific key confirmation with TLS's key confirmation is sufficient. Is that a correct summary?",
+          "createdAt": "2024-12-03T15:29:10Z",
+          "updatedAt": "2024-12-03T15:29:10Z"
         }
       ]
     },
@@ -176,7 +190,7 @@
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nThere were several requests to clarify the purpose of client and server identities, and suggestions on how they should be negotiated.\r\n\r\nSeveral overlapping ideas have been suggested so far:\r\n- Make identities PAKE-specific, so that different PAKEs can treat them differently (@BjoernMHaase)\r\n- It's enough to make identities optional, as the draft currently does (@menonsamir)\r\n- Make the client identity set in the ClientHello, the server identity \u2018requested\u2019 in the ClientHello, and the server + client identity \u2018selected\u2019 in the ServerHello (@bifurcation)\r\n\r\nLet's kick off discussion on this topic here.",
       "createdAt": "2024-11-11T20:29:22Z",
-      "updatedAt": "2024-11-21T03:18:57Z",
+      "updatedAt": "2024-12-03T15:30:45Z",
       "closedAt": null,
       "comments": [
         {
@@ -199,6 +213,13 @@
           "body": "The client identity and server identity do not seem to be PAKE-specific, because they are often specified by the application. For example, when a client wishes to connect to a server through this PAKE extension, the server identity is determined and the client needs to choose one identity that he/she wants to login no matter which PAKE algorithm is used in this connection. Therefore, can the client identity and server identity be regarded as common fields for this PAKE extension.",
           "createdAt": "2024-11-21T03:18:56Z",
           "updatedAt": "2024-11-21T03:18:56Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "> Therefore, can the client identity and server identity be regarded as common fields for this PAKE extension.\r\n\r\nYes, and that's exactly how they are used right now. I'm confused -- are you advocating for a change to the spec? If this issue reduces to encrypting the identities, I'm going to close it since that's addressed by ECH. @BjoernMHaase, thoughts?",
+          "createdAt": "2024-12-03T15:30:44Z",
+          "updatedAt": "2024-12-03T15:30:44Z"
         }
       ]
     },
@@ -214,7 +235,7 @@
       "labels": [],
       "body": "In practice the benefit of resilience with respect to server compromise of augmented PAKEs can only be obtained when using memory-hard PBKDF functions which will be parametrized by a workload parameter. In our own environment we denote this combined PBKDF + workload parameter with the greek letter of a small \"sigma\".\r\n\r\nThe draft needs to consider this aspect IMO. Also we should prepare that within one application the parametrization of the workload parameter will be changing over time.\r\n\r\nAs the TLS connection between server and client probably should be expected to be the first interconnection between both parties, we will need to have the handshake regarding the PBKDF and its parametrization to be implemented using the client and server hello messages.\r\n\r\nAs a result I suggest to include a separate set of IANA numbers into the pake-specific payload part. A client may start an attempt with a message for a given PBKDF and parametrization but should be prepared to find a different PBKDF parametrization in the server hello message, such that the appropriate procedure of reaction will be a client hello retry and a second server hello.\r\n\r\nIn principle a PBKDF will be requesting also some SALT value. I'd be in favor of allowing PAKE cipher suites to define whether a salt value is also required. A salt value could be made an optional parameter sent alongside with \"sigma\".",
       "createdAt": "2024-11-12T13:03:07Z",
-      "updatedAt": "2024-11-29T09:39:50Z",
+      "updatedAt": "2024-12-03T15:51:46Z",
       "closedAt": null,
       "comments": [
         {
@@ -328,8 +349,31 @@
           "body": "@BjoernMHaase \r\n\r\n1. Is there some use-case where PAKEs don\u2019t work at all with identity fields but only with passwords?\r\n\r\n2. If the PBKDF function and parameters as well as the salt value don\u2019t need to be transferred from the server to the client, there are also two cases that need to be considered, similar to the standard TLS 1.3 key exchange.\r\n\r\nIn case that HelloRetryRequest does not occur the message flow might look as follows\r\n\r\nClientHello:\r\nPAKE_protocolCode(pake_algorithms={pake_algorithm1, pake_algorithm2, pake_algorithm3}, pake_share={client_identity, client_shares={pake_algorithm1, client_pake_share for pake_algorithm1}})\r\n\r\nServerHello:\r\nPAKE_protocolCode(pake_share={server_identity, server_share={pake_algorithm1, server_pake_share for pake_algorithm1}})\r\n\r\nIn case that HelloRetryRequest does occur the message flow might look as follows\r\n\r\nClientHello:\r\nPAKE_protocolCode(pake_algorithms={pake_algorithm1, pake_algorithm2, pake_algorithm3}, pake_share={client_identity, client_shares={pake_algorithm1, client_pake_share for pake_algorithm1}})\r\n\r\nHelloRetryRequest:\r\nPAKE_protocolCode(pake_share={pake_algorithm2})\r\n\r\nSecondClientHello:\r\nPAKE_protocolCode(pake_algorithms={pake_algorithm1, pake_algorithm2, pake_algorithm3}, pake_share={client_identity, client_shares={pake_algorithm2, client_pake_share for pake_algorithm2}})\r\n\r\nServerHello:\r\nPAKE_protocolCode(pake_share={server_identity, server_share=(pake_algorithm2, server_pake_share for pake_algorithm2)})\r\n\r\nIn the above HelloRetryRequest message, only one selected_pake_algorithm field is defined in this message\u2019s pake_share extension. When considering the transfer of the PBKDF function and parameters as well as the salt value, more fields need to be defined in the pake_share extension of HRR message, and these fields may be optional in some cases (for example, in the second case given above).",
           "createdAt": "2024-11-29T09:39:48Z",
           "updatedAt": "2024-11-29T09:39:48Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "@BjoernMHaase:\r\n\r\n> My suggestion would be to allocate a code-point for a joint PBKDF+workload parameter combination, one code point for the curve and a separate code point for a PAKE protocol variant.\r\n\r\nWe do not need separate code points for the PAKE protocol and curve. These can -- and should -- be the same codepoint, e.g., \"SPAKE2+ with P-256, SHA-256, HKDF-SHA256, and HMAC-SHA256\" is one entry in the registry. There is no need to negotiate these things separately. \r\n\r\nThat leaves us with the discussion about PBKDF parameterization. As has already been mentioned, this is an application-specific choice, and something the server does not even need to know about. Applications which have default values can simply use them. Applications which want to support multiple values can do so in a variety of ways:\r\n\r\n1. Applications can attempt to establish TLS connections with their preferred PBKDF parameter values, retrying with alternative values if the connection fails. (In this variant, the application would need to encode which parameter set it used in the identity, e.g., \"client_identity = <real client identity> || <PBKDF parameter values>\" (or whatever). This is needed because the server searches for registrations based on (a) client identity, (b) server identity, and (c) PAKE algorithm. \r\n2. Applications can implement logic wherein the client asks the server, in some out-of-band way, \"hey, what parameter set should I use?\"\r\n\r\nThere are probably other ways to do this, too.\r\n\r\nGiven that it's possible with the draft currently specified, I see no reason to try and shove this logic into the handshake. Doing so does nothing but add complexity where it's demonstrably not needed.\r\n\r\nIf the current specification cannot work for a particular application scenario, please describe that scenario, and please explain why the specification does not work. ",
+          "createdAt": "2024-12-03T15:51:45Z",
+          "updatedAt": "2024-12-03T15:51:45Z"
         }
       ]
+    },
+    {
+      "number": 10,
+      "id": "I_kwDOM83jm86h4Uvb",
+      "title": "PAKE IDs MUST be sent in increasing order",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/10",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "This would avoid complicated code to parse the list of PAKE shares and check for duplicates.",
+      "createdAt": "2024-12-03T20:16:49Z",
+      "updatedAt": "2024-12-03T20:16:49Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -411,24 +455,26 @@
       "id": "PR_kwDOM83jm86CFyGa",
       "title": "Factor out identities from PakeShare",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/8",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "baumanl",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Previously had the client and server identity in each PAKEShare in the client hello, but had a requirement that they were all the same (to prevent enumeration attacks). This change factors the identity out to the PAKEClientHello to eliminate the need to check that they are all the same.",
       "createdAt": "2024-11-15T20:49:17Z",
-      "updatedAt": "2024-11-15T20:56:58Z",
+      "updatedAt": "2024-12-03T17:24:03Z",
       "baseRepository": "chris-wood/draft-bmw-tls-pake13",
       "baseRefName": "main",
       "baseRefOid": "0207b2f04d237f9fceca966615adfa0a48268de4",
       "headRepository": "chris-wood/draft-bmw-tls-pake13",
       "headRefName": "lbauman/identity",
       "headRefOid": "aa00a05f066d75cdb1b9baacb608ed993816133e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-12-03T17:24:03Z",
+      "mergedAt": "2024-12-03T17:24:03Z",
+      "mergedBy": "chris-wood",
+      "mergeCommit": {
+        "oid": "0b400a172b3b8ce1eec84d5790a4dc1d4cf63102"
+      },
       "comments": [
         {
           "author": "baumanl",
@@ -438,33 +484,103 @@
           "updatedAt": "2024-11-15T20:55:32Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86Tmhl3",
+          "commit": {
+            "abbreviatedOid": "aa00a05"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-12-03T17:23:58Z",
+          "updatedAt": "2024-12-03T17:23:58Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 9,
       "id": "PR_kwDOM83jm86CF6OY",
       "title": "update text around value used as input to TLS key sched",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/9",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "baumanl",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Text was inconsistent with diagram and implementation. The SPAKE2+ confirmation messages are not computed or involved in the protocol. Instead, K_Shared (which depends on the protocol transcript) is used as input to the ECDHE key schedule and the TLS finished messages are used in place of the SPAKE2+ confirmation messages.",
       "createdAt": "2024-11-15T21:12:13Z",
-      "updatedAt": "2024-11-15T21:12:24Z",
+      "updatedAt": "2024-12-03T17:24:24Z",
       "baseRepository": "chris-wood/draft-bmw-tls-pake13",
       "baseRefName": "main",
       "baseRefOid": "0207b2f04d237f9fceca966615adfa0a48268de4",
       "headRepository": "chris-wood/draft-bmw-tls-pake13",
       "headRefName": "lbauman/key_sched",
       "headRefOid": "3bfcecc1da7099a49db9e3dc210b624045f298d2",
+      "closedAt": "2024-12-03T17:24:24Z",
+      "mergedAt": "2024-12-03T17:24:24Z",
+      "mergedBy": "chris-wood",
+      "mergeCommit": {
+        "oid": "092f92ddbb1e598eca7477ede9f8152436b91f89"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86TmhyD",
+          "commit": {
+            "abbreviatedOid": "3bfcecc"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-12-03T17:24:20Z",
+          "updatedAt": "2024-12-03T17:24:20Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOM83jm86D8g6K",
+      "title": "Sort to simplify duplicate detection",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/11",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #10 ",
+      "createdAt": "2024-12-03T21:21:00Z",
+      "updatedAt": "2024-12-04T17:19:43Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "e32284368db47b9dd890e973443a87e1a7a30ac3",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "caw/sort",
+      "headRefOid": "9c0f42615a4d3646a52bd6210ee7949b3b611295",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86TyMZN",
+          "commit": {
+            "abbreviatedOid": "9c0f426"
+          },
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-12-04T17:19:43Z",
+          "updatedAt": "2024-12-04T17:19:43Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
