@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-12T00:17:59.956396+00:00",
+  "timestamp": "2024-12-15T00:20:12.751357+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -372,6 +372,22 @@
       "body": "This would avoid complicated code to parse the list of PAKE shares and check for duplicates.",
       "createdAt": "2024-12-03T20:16:49Z",
       "updatedAt": "2024-12-03T20:16:49Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 12,
+      "id": "I_kwDOM83jm86jILH2",
+      "title": "How does juggling multiple PAKE algorithms work?",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/12",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "If transitioning between PAKEs algorithms, a client may find itself needing to offer multiple PAKE shares. But this means computing the initial message for _each_ PAKE and sending all of them. This may be expensive for, e.g. PQ-sized options or just when there are many algorithms to support.\r\n\r\nFor key_share, we had this whole HelloRetryRequest dance. Do we need something similar here?",
+      "createdAt": "2024-12-12T20:33:12Z",
+      "updatedAt": "2024-12-12T20:33:12Z",
       "closedAt": null,
       "comments": []
     }
