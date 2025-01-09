@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-07T00:17:43.854562+00:00",
+  "timestamp": "2025-01-09T00:17:00.222001+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -387,9 +387,17 @@
       "labels": [],
       "body": "If transitioning between PAKEs algorithms, a client may find itself needing to offer multiple PAKE shares. But this means computing the initial message for _each_ PAKE and sending all of them. This may be expensive for, e.g. PQ-sized options or just when there are many algorithms to support.\r\n\r\nFor key_share, we had this whole HelloRetryRequest dance. Do we need something similar here?",
       "createdAt": "2024-12-12T20:33:12Z",
-      "updatedAt": "2024-12-12T20:33:12Z",
+      "updatedAt": "2025-01-07T00:38:09Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Our take was that unlike key_share and the general situation where the TLS client and server need to be able to handle a broad range of supported group options, in the PAKE case it is unlikely there will be many algorithms. PAKEs are typically used for more peer to peer protocols and require the client to register to the server before running the protocol, so if the server requires a specific PAKE it could feasibly tell the client that at registration time (maybe we don't want to depend on application layer negotiation of TLS parameters, but this seems like a case where it would be possible). \r\n\r\nIn the case where multiple PQ sized options need to be computed and sent then HRR support could be useful. But considering we don't yet have a single PQ PAKE I am not convinced it is worth the complexity to specify the entire HRR flow now as opposed to leaving it for future work if and when it becomes a concern. ",
+          "createdAt": "2025-01-07T00:38:07Z",
+          "updatedAt": "2025-01-07T00:38:07Z"
+        }
+      ]
     }
   ],
   "pulls": [
