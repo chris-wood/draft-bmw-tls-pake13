@@ -310,8 +310,8 @@ of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareP` as computed in
 {{Section 3.3 of SPAKE2PLUS}}.
 
 The content of the server PAKEShare value in the PAKEServerHello structure
-consists of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareV` as
-computed in {{Section 3.3 of SPAKE2PLUS}}.
+consists of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareV || confirmV`,
+i.e., `shareV` and `confirmV` concatenated, as computed in {{Section 3.3 of SPAKE2PLUS}}.
 
 Given `shareP` and `shareV`, the client and server can then both compute
 K_main, the root secret in the protocol as described in {{Section 3.4 of SPAKE2PLUS}}.
