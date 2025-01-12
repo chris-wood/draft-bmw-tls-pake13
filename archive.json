@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-09T00:17:00.222001+00:00",
+  "timestamp": "2025-01-12T00:18:44.893757+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -398,6 +398,22 @@
           "updatedAt": "2025-01-07T00:38:07Z"
         }
       ]
+    },
+    {
+      "number": 14,
+      "id": "I_kwDOM83jm86lvllz",
+      "title": "Draft should discuss rate-limiting and brute forcing the low-entropy secret",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/14",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Since PAKEs are used with low-entropy secrets and an attacker can still use a single connection to confirm a guess about the secret, ISTM that TLS-PAKE can never be used without a very tight handle on that.\r\n\r\nFrom what I can tell, at minimum:\r\n\r\n* If you are a client, I _think_ you only need to count failures, i.e. bad confirmV strings from the server. Correct confirmV strings don't contribute to an attacker's ability to guess the secret\r\n* If you are a server, I _think_ you need need to count both failures and incomplete handshakes, because the server sends confirmV before the client sends \"confirmP\"/Finished\r\n\r\nOf course, those are pretty invasive, so if that isn't done deep in the TLS implementation, you might need to limit more things, which gets even more restrictive as to what applications can usefully use this. How much of a limit you can tolerate probably depends on the entropy of the low-entropy secret.\r\n\r\nThis is all extra fun because that means the server actually needs to limit parallel incoming connections from a client. This, in turn, means that TLS-PAKE is probably not appropriate for more typical TLS uses that freely make connections, and instead you should use like one special-purpose TLS-PAKE connection to establish more robust credentials first, and then use that to freely make connection.\r\n\r\nWe probably need text in the I-D somewhere discussing all this.",
+      "createdAt": "2025-01-10T17:34:21Z",
+      "updatedAt": "2025-01-10T17:34:21Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -602,6 +618,48 @@
           "body": "",
           "createdAt": "2024-12-04T17:19:43Z",
           "updatedAt": "2024-12-04T17:19:43Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "id": "PR_kwDOM83jm86HO2lF",
+      "title": "Servers compute and include confirmV in PAKEServerHello",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/13",
+      "state": "MERGED",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "This was a bug in the spec and matches [the implementation](https://boringssl-review.googlesource.com/c/boringssl/+/72427).",
+      "createdAt": "2025-01-09T16:42:15Z",
+      "updatedAt": "2025-01-10T16:17:31Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "e32284368db47b9dd890e973443a87e1a7a30ac3",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "chris-wood-patch-1",
+      "headRefOid": "f49260fc74e326cca24b3e063eecbed7cf97179d",
+      "closedAt": "2025-01-10T16:17:31Z",
+      "mergedAt": "2025-01-10T16:17:31Z",
+      "mergedBy": "chris-wood",
+      "mergeCommit": {
+        "oid": "53db802b33640a2a401a5614156618136088e775"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86XbSRV",
+          "commit": {
+            "abbreviatedOid": "f49260f"
+          },
+          "author": "menonsamir",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-09T17:20:46Z",
+          "updatedAt": "2025-01-09T17:20:46Z",
           "comments": []
         }
       ]
