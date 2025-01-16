@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-12T00:18:44.893757+00:00",
+  "timestamp": "2025-01-16T00:16:30.522488+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -371,9 +371,17 @@
       "labels": [],
       "body": "This would avoid complicated code to parse the list of PAKE shares and check for duplicates.",
       "createdAt": "2024-12-03T20:16:49Z",
-      "updatedAt": "2024-12-03T20:16:49Z",
+      "updatedAt": "2025-01-14T21:36:56Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "Depends on whether or not this should be a preference list.",
+          "createdAt": "2025-01-14T21:36:54Z",
+          "updatedAt": "2025-01-14T21:36:54Z"
+        }
+      ]
     },
     {
       "number": 12,
@@ -407,13 +415,23 @@
       "state": "OPEN",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "menonsamir"
+      ],
       "labels": [],
       "body": "Since PAKEs are used with low-entropy secrets and an attacker can still use a single connection to confirm a guess about the secret, ISTM that TLS-PAKE can never be used without a very tight handle on that.\r\n\r\nFrom what I can tell, at minimum:\r\n\r\n* If you are a client, I _think_ you only need to count failures, i.e. bad confirmV strings from the server. Correct confirmV strings don't contribute to an attacker's ability to guess the secret\r\n* If you are a server, I _think_ you need need to count both failures and incomplete handshakes, because the server sends confirmV before the client sends \"confirmP\"/Finished\r\n\r\nOf course, those are pretty invasive, so if that isn't done deep in the TLS implementation, you might need to limit more things, which gets even more restrictive as to what applications can usefully use this. How much of a limit you can tolerate probably depends on the entropy of the low-entropy secret.\r\n\r\nThis is all extra fun because that means the server actually needs to limit parallel incoming connections from a client. This, in turn, means that TLS-PAKE is probably not appropriate for more typical TLS uses that freely make connections, and instead you should use like one special-purpose TLS-PAKE connection to establish more robust credentials first, and then use that to freely make connection.\r\n\r\nWe probably need text in the I-D somewhere discussing all this.",
       "createdAt": "2025-01-10T17:34:21Z",
-      "updatedAt": "2025-01-10T17:34:21Z",
+      "updatedAt": "2025-01-14T21:29:27Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "Draft should talk about what a failed dictionary attack attempt is, you should apply a mitigation, and then suggest some mitigations.",
+          "createdAt": "2025-01-14T21:28:29Z",
+          "updatedAt": "2025-01-14T21:28:29Z"
+        }
+      ]
     }
   ],
   "pulls": [
