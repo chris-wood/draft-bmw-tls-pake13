@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-16T00:16:30.522488+00:00",
+  "timestamp": "2025-01-19T00:17:59.220241+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -432,6 +432,22 @@
           "updatedAt": "2025-01-14T21:28:29Z"
         }
       ]
+    },
+    {
+      "number": 15,
+      "id": "I_kwDOM83jm86mrcjg",
+      "title": "Rename NamedPAKE to just PAKE or so?",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/15",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I'm guessing NamedPAKE was chosen in reference to NamedGroup and NamedCurve? AIUI, \"named\" there is because both ECDHE and DHE had incarnations in TLS where, rather than referencing the algorithm by name, you spelled the parameters out explicitly.\n\n* DHE had the pre-RFC-7919 formulation where the server just specified p and g on the wire. (The post-RFC-7919 formulation is also didn't really fix it, but that's beside the point. \ud83d\ude04)\n* RFC 4492, before RFC 8996 removed it, had `arbitrary_explicit_prime_curves` and `arbitrary_explicit_char2_curves` for spelling the ECDHE curve out.\n\nThese explicit options were widely considered mistakes, so hopefully we won't have this named vs explicit dichotomy to capture anymore. Elsewhere, cipher suites and signature schemes are also names given to parameter sets, and we just call them CipherSuite and SignatureScheme since there is an alternate to distinguish.\n\nGiven that, should we rename `NamedPAKE` to just `PAKE` or something? (And then folks aren't tempted to stick \"named\" in APIs, which seems just confusing. \ud83d\ude04 )",
+      "createdAt": "2025-01-17T22:28:04Z",
+      "updatedAt": "2025-01-17T22:28:04Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
