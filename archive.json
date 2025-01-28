@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-26T00:16:31.387161+00:00",
+  "timestamp": "2025-01-28T00:16:54.394397+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -446,6 +446,22 @@
       "body": "I'm guessing NamedPAKE was chosen in reference to NamedGroup and NamedCurve? AIUI, \"named\" there is because both ECDHE and DHE had incarnations in TLS where, rather than referencing the algorithm by name, you spelled the parameters out explicitly.\n\n* DHE had the pre-RFC-7919 formulation where the server just specified p and g on the wire. (The post-RFC-7919 formulation is also didn't really fix it, but that's beside the point. \ud83d\ude04)\n* RFC 4492, before RFC 8996 removed it, had `arbitrary_explicit_prime_curves` and `arbitrary_explicit_char2_curves` for spelling the ECDHE curve out.\n\nThese explicit options were widely considered mistakes, so hopefully we won't have this named vs explicit dichotomy to capture anymore. Elsewhere, cipher suites and signature schemes are also names given to parameter sets, and we just call them CipherSuite and SignatureScheme since there is an alternate to distinguish.\n\nGiven that, should we rename `NamedPAKE` to just `PAKE` or something? (And then folks aren't tempted to stick \"named\" in APIs, which seems just confusing. \ud83d\ude04 )",
       "createdAt": "2025-01-17T22:28:04Z",
       "updatedAt": "2025-01-17T22:28:04Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 16,
+      "id": "I_kwDOM83jm86num3H",
+      "title": "pake removes the need for supported_groups and signature_algorithms",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/16",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC 8446, section 9.2 has this text:\n\n>    -  If not containing a \"pre_shared_key\" extension, it MUST contain\n>      both a \"signature_algorithms\" extension and a \"supported_groups\"\n>      extension.\n\nThis text is correct for RFC 8446, but this draft introduces another option that removes the need for the certificate-based flow. We probably need a sentence somewhere saying that explicitly.",
+      "createdAt": "2025-01-27T20:39:43Z",
+      "updatedAt": "2025-01-27T20:39:43Z",
       "closedAt": null,
       "comments": []
     }
