@@ -79,7 +79,7 @@ Table of Contents
    8.  Security Considerations
      8.1.  SPAKE2+ Security Considerations
    9.  IANA Considerations
-     9.1.  Named PAKE registry
+     9.1.  PAKE Scheme registry
    Acknowledgments
    References
      Normative References
@@ -171,10 +171,10 @@ Table of Contents
 
    enum {
        SPAKE2PLUS_V1 (0xXXXX),
-   } NamedPAKE;
+   } PAKEScheme;
 
    struct {
-       NamedPAKE   named_pake;
+       PAKEScheme   pake_scheme;
        opaque      pake_message<1..2^16-1>;
    } PAKEShare;
 
@@ -190,7 +190,7 @@ Table of Contents
    Concretely, these structure fields are defined as follows:
 
    client_shares  A list of PAKEShare values, each one with a distinct
-      NamedPAKE algorithm.
+      PAKEScheme algorithm.
 
    client_identity  The client identity used for the PAKE.  It may be
       empty.
@@ -198,7 +198,7 @@ Table of Contents
    server_identity  The server identity used for the PAKE.  It may be
       empty.
 
-   named_pake  The 2-byte identifier of the PAKE algorithm.
+   pake_scheme  The 2-byte identifier of the PAKE algorithm.
 
    pake_message  The client PAKE message used to initialize the
       protocol.
@@ -206,7 +206,7 @@ Table of Contents
    The client and server identity fields are common to all PAKEShares to
    prevent client enumeration attacks; see Section 8.
 
-   The NamedPAKE field in the PAKEShare allows implementations to
+   The PAKEScheme field in the PAKEShare allows implementations to
    support multiple PAKEs and negotiate which to use in the context of
    the handshake.  For instance, if a client knows a password but not
    which PAKE the server supports it could send corresponding PAKEShares
@@ -242,17 +242,17 @@ Table of Contents
    A server that receives a pake extension examines its contents to
    determine if it is well-formed.  In particular, if there are
    duplicate PAKEShare values in the PAKEClientHello structure for the
-   same NamedPAKE, the server aborts the handshake with an
+   same PAKEScheme, the server aborts the handshake with an
    "illegal_parameter" alert.
 
    If the list of PAKEShare values is well-formed, the server then scans
    the list of PAKEShare values to determine if there is one
-   corresponding to a server supported NamedPAKE.  If the server does
-   not support any of the offered NamedPAKEs in the client PAKEShares
+   corresponding to a server supported PAKEScheme.  If the server does
+   not support any of the offered PAKESchemes in the client PAKEShares
    then the server MUST abort the protocol with an "illegal_parameter"
    alert.
 
-   If the server has a NamedPAKE in common with the client then the
+   If the server has a PAKEScheme in common with the client then the
    server uses the client_identity and server_identity alongside its
    local database of PAKE registration information to determine if the
    request corresponds to a legitimate client registration record.  If
@@ -301,10 +301,10 @@ Table of Contents
 
    To simulate a fake PAKE response, the server does the following:
 
-   *  Select a random NamedPAKE supported by the client and server.
+   *  Select a random PAKEScheme supported by the client and server.
 
    *  Include the pake extension in its ServerHello, containing a
-      PAKEShare value with the randomly selected NamedPAKE and
+      PAKEShare value with the randomly selected PAKEScheme and
       corresponding pake_message.  To generate the pake_message for this
       PAKEShare value, the server should select a value uniformly at
       random from the set of possible values of the PAKE algorithm
@@ -330,7 +330,7 @@ Table of Contents
    describing the use of a particular PAKE protocol with TLS must
    provide the following details:
 
-   *  A NamedPAKE registered value indicating pre-provisioned
+   *  A PAKEScheme registered value indicating pre-provisioned
       parameters;
 
    *  Content of the pake_message field in a ClientHello;
@@ -376,22 +376,22 @@ Table of Contents
    not specified here; see Section 3.2 of [SPAKE2PLUS] for more
    information.
 
-   The NamedPake value for SPAKE2+ fully defines the parameters
+   The PAKEScheme value for SPAKE2+ fully defines the parameters
    associated with the protocol, including the prime-order group G,
    cryptographic hash function Hash, key derivation function KDF, and
-   message authentication code MAC.  Additionally, the NamedPake value
+   message authentication code MAC.  Additionally, the PAKEScheme value
    for SPAKE2+ fully defines the constants for M and N as needed for the
    protocol; see Section 4 of [SPAKE2PLUS].
 
 6.2.  Protocol Execution
 
    The content of one PAKEShare value in the PAKEClientHello structure
-   consists of the NamedPAKE value SPAKE2PLUS_V1 and the value shareP as
-   computed in Section 3.3 of [SPAKE2PLUS].
+   consists of the PAKEScheme value SPAKE2PLUS_V1 and the value shareP
+   as computed in Section 3.3 of [SPAKE2PLUS].
 
    The content of the server PAKEShare value in the PAKEServerHello
-   structure consists of the NamedPAKE value SPAKE2PLUS_V1 and the value
-   shareV || confirmV, i.e., shareV and confirmV concatenated, as
+   structure consists of the PAKEScheme value SPAKE2PLUS_V1 and the
+   value shareV || confirmV, i.e., shareV and confirmV concatenated, as
    computed in Section 3.3 of [SPAKE2PLUS].
 
    Given shareP and shareV, the client and server can then both compute
@@ -508,20 +508,20 @@ Table of Contents
    value assigned by IANA, and replace "(this document)" with the RFC
    number assigned to this document. ]]
 
-9.1.  Named PAKE registry
+9.1.  PAKE Scheme registry
 
-   This document requests that IANA create a new registry called "Named
-   PAKE Algorithms" with the following contents:
+   This document requests that IANA create a new registry called "PAKE
+   Schemes" with the following contents:
 
            +========+===============+=================+=======+
-           | Value  | Named PAKE    |    Reference    | Notes |
+           | Value  | PAKEScheme    |    Reference    | Notes |
            +========+===============+=================+=======+
            | 0xTODO | SPAKE2PLUS_V1 | (this document) | N/A   |
            +--------+---------------+-----------------+-------+
 
                                  Table 2
 
-   The SPAKE2PLUS_V1 NamedPAKE variant has the following parameters
+   The SPAKE2PLUS_V1 PAKEScheme variant has the following parameters
    associated with it:
 
    *  G: P-256
