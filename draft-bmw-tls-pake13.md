@@ -68,6 +68,16 @@ Enabling TLS to address this use case effectively requires the TLS
 handshake to execute a password-authenticated key establishment
 (PAKE) protocol. This document describes a TLS extension `pake`
 that can carry data necessary to execute a PAKE.
+{{Section 9.2 of !TLS13=RFC8446}} specifies that a valid Client
+Hello must include either a `pre_shared_key` extension or both
+a `signature_algorithms` and `supported_groups` extension. With the
+addition of the `pake` extension specified here, the new requirement
+is that a valid Client Hello must satisfy at least one of the
+following options:
+
+* includes a `pre_shared_key` extension
+* includes both a `signature_algorithms` and `supported_groups` extensions
+* includes a `pake` extension
 
 This extension is generic, in that it can be used to carry key
 exchange information for multiple different PAKEs. We assume that
