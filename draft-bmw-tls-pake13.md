@@ -164,6 +164,17 @@ the handshake. For instance, if a client knows a password but not which
 PAKE the server supports it could send corresponding PAKEShares for each
 PAKE.
 
+{{Section 9.2 of !TLS13=RFC8446}} specifies that a valid ClientHello
+must include either a `pre_shared_key` extension or both
+a `signature_algorithms` and `supported_groups` extension. With the
+addition of the `pake` extension specified here, the new requirement
+is that a valid ClientHello must satisfy at least one of the
+following options:
+
+* includes a `pre_shared_key` extension
+* includes both a `signature_algorithms` and `supported_groups` extensions
+* includes a `pake` extension
+
 If a client sends the `pake` extension, then it MAY also send the
 `key_share` and `pre_shared_key` extensions, to allow the server to
 choose an authentication mode. Unlike PSK-based authentication,
