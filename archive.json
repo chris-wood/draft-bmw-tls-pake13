@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-30T00:16:13.910889+00:00",
+  "timestamp": "2025-02-02T00:17:52.741009+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -388,15 +388,15 @@
       "id": "I_kwDOM83jm86jILH2",
       "title": "How does juggling multiple PAKE algorithms work?",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/12",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "If transitioning between PAKEs algorithms, a client may find itself needing to offer multiple PAKE shares. But this means computing the initial message for _each_ PAKE and sending all of them. This may be expensive for, e.g. PQ-sized options or just when there are many algorithms to support.\r\n\r\nFor key_share, we had this whole HelloRetryRequest dance. Do we need something similar here?",
       "createdAt": "2024-12-12T20:33:12Z",
-      "updatedAt": "2025-01-07T00:38:09Z",
-      "closedAt": null,
+      "updatedAt": "2025-01-31T22:16:03Z",
+      "closedAt": "2025-01-31T22:16:02Z",
       "comments": [
         {
           "author": "baumanl",
@@ -404,6 +404,13 @@
           "body": "Our take was that unlike key_share and the general situation where the TLS client and server need to be able to handle a broad range of supported group options, in the PAKE case it is unlikely there will be many algorithms. PAKEs are typically used for more peer to peer protocols and require the client to register to the server before running the protocol, so if the server requires a specific PAKE it could feasibly tell the client that at registration time (maybe we don't want to depend on application layer negotiation of TLS parameters, but this seems like a case where it would be possible). \r\n\r\nIn the case where multiple PQ sized options need to be computed and sent then HRR support could be useful. But considering we don't yet have a single PQ PAKE I am not convinced it is worth the complexity to specify the entire HRR flow now as opposed to leaving it for future work if and when it becomes a concern. ",
           "createdAt": "2025-01-07T00:38:07Z",
           "updatedAt": "2025-01-07T00:38:07Z"
+        },
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@davidben I believe we discussed this offline. I'm going to close, but let me know if there are still concerns here.",
+          "createdAt": "2025-01-31T22:16:02Z",
+          "updatedAt": "2025-01-31T22:16:02Z"
         }
       ]
     },
@@ -438,31 +445,60 @@
       "id": "I_kwDOM83jm86mrcjg",
       "title": "Rename NamedPAKE to just PAKE or so?",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/15",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "I'm guessing NamedPAKE was chosen in reference to NamedGroup and NamedCurve? AIUI, \"named\" there is because both ECDHE and DHE had incarnations in TLS where, rather than referencing the algorithm by name, you spelled the parameters out explicitly.\n\n* DHE had the pre-RFC-7919 formulation where the server just specified p and g on the wire. (The post-RFC-7919 formulation is also didn't really fix it, but that's beside the point. \ud83d\ude04)\n* RFC 4492, before RFC 8996 removed it, had `arbitrary_explicit_prime_curves` and `arbitrary_explicit_char2_curves` for spelling the ECDHE curve out.\n\nThese explicit options were widely considered mistakes, so hopefully we won't have this named vs explicit dichotomy to capture anymore. Elsewhere, cipher suites and signature schemes are also names given to parameter sets, and we just call them CipherSuite and SignatureScheme since there is an alternate to distinguish.\n\nGiven that, should we rename `NamedPAKE` to just `PAKE` or something? (And then folks aren't tempted to stick \"named\" in APIs, which seems just confusing. \ud83d\ude04 )",
       "createdAt": "2025-01-17T22:28:04Z",
-      "updatedAt": "2025-01-17T22:28:04Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-01-31T23:12:38Z",
+      "closedAt": "2025-01-31T23:12:38Z",
+      "comments": [
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I defer to your knowledge of the history of \"named\" prefixes and I agree we don't want to imply we are also supporting an \"explicit\" parameter mode! But when just `PAKE` is used I think parts of the draft could be confusing to read since there could potentially be different `PAKE`'s all using the same underlying PAKE but with different parameters selected. (e.g. `SPAKE2PLUS_V1` and a theoretical `SPAKE2PLUS_V2`). ",
+          "createdAt": "2025-01-31T19:03:15Z",
+          "updatedAt": "2025-01-31T19:03:15Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ah yeah, having both `PAKE` (the enum) and `pake` (the extension) is confusing. Also gets into philosophical questions about whether SPAKE2+ is a PAKE or a parameterized family of PAKEs. I dunno if \"named\" really captures that either though. (Mostly I feel very silly saying \"named group\" to people because it's such a meaningless combination of words. \ud83d\ude06)\n\nHmm... spitballing, what about PAKEScheme or PAKEAlgorithm or PAKESuite?\n\nSignatures use SignatureScheme, but that's mostly because SignatureAlgorithm was already taken (also by a parameterized family vs instantiation mishap). But scheme is also shorter than algorithm, so I don't particularly regret it.\n\nCipher suites use \"suite\" but that's because they used to be all-encompassing (in SSL 3 they were the only parameter) and then gradually chunks got pulled out (we have `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`, not `TLS_ECDHE_P256_RSA_WITH_AES_128_GCM_SHA256`), until we finally gave up on that in TLS 1.3 and made them just the AEAD and PRF hash. (And really the PRF hash was only there because adding a new enum seemed silly.)\n\nI think I would lean more towards \"scheme\" or \"algorithm\". There's also \"ID\" but PAKEID is illegible.\n\nWDYT?",
+          "createdAt": "2025-01-31T19:50:05Z",
+          "updatedAt": "2025-01-31T19:50:05Z"
+        },
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I like PAKEScheme. I think algorithm still somewhat implies that it is referring to a particular PAKE/family of PAKEs. I think Scheme is fuzzy enough that it avoids that but still provides enough context on what the enum is. ",
+          "createdAt": "2025-01-31T19:54:28Z",
+          "updatedAt": "2025-01-31T19:54:28Z"
+        },
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "SGTM!",
+          "createdAt": "2025-01-31T21:45:58Z",
+          "updatedAt": "2025-01-31T21:45:58Z"
+        }
+      ]
     },
     {
       "number": 16,
       "id": "I_kwDOM83jm86num3H",
       "title": "pake removes the need for supported_groups and signature_algorithms",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/16",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "RFC 8446, section 9.2 has this text:\n\n>    -  If not containing a \"pre_shared_key\" extension, it MUST contain\n>      both a \"signature_algorithms\" extension and a \"supported_groups\"\n>      extension.\n\nThis text is correct for RFC 8446, but this draft introduces another option that removes the need for the certificate-based flow. We probably need a sentence somewhere saying that explicitly.",
       "createdAt": "2025-01-27T20:39:43Z",
-      "updatedAt": "2025-01-27T20:39:43Z",
-      "closedAt": null,
+      "updatedAt": "2025-01-31T19:44:59Z",
+      "closedAt": "2025-01-31T19:44:59Z",
       "comments": []
     }
   ],
@@ -644,7 +680,7 @@
       "labels": [],
       "body": "Closes #10 ",
       "createdAt": "2024-12-03T21:21:00Z",
-      "updatedAt": "2024-12-04T17:19:43Z",
+      "updatedAt": "2025-01-31T19:35:08Z",
       "baseRepository": "chris-wood/draft-bmw-tls-pake13",
       "baseRefName": "main",
       "baseRefOid": "e32284368db47b9dd890e973443a87e1a7a30ac3",
@@ -655,7 +691,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "FWIW, this is the version we ended up implementing in BoringSSL. Purely because we already had the code for it and I was too lazy to change it. :-) Though if folks particularly want it to not be sorted, I can go back and tweak it. One way or another, I think we should either:\r\n\r\n* Say it is a client preference order\r\n* Say it is sorted\r\n\r\nRight now I think we say neither. But also I assume everything about negotiation will get reworked to no end later anyway.",
+          "createdAt": "2025-01-31T19:35:06Z",
+          "updatedAt": "2025-01-31T19:35:06Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOM83jm86TyMZN",
@@ -710,6 +754,143 @@
           "body": "",
           "createdAt": "2025-01-09T17:20:46Z",
           "updatedAt": "2025-01-09T17:20:46Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "id": "PR_kwDOM83jm86Jrcb1",
+      "title": "add text around modification to supported_groups requirement",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/17",
+      "state": "MERGED",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Initial attempt to clarify the new requirements for a valid client hello. ",
+      "createdAt": "2025-01-31T19:17:13Z",
+      "updatedAt": "2025-01-31T19:44:58Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "53db802b33640a2a401a5614156618136088e775",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "l_bauman/req_ext_clarification",
+      "headRefOid": "89e49afa5582964d6c68ee939ca2ee7eeab4736a",
+      "closedAt": "2025-01-31T19:44:58Z",
+      "mergedAt": "2025-01-31T19:44:58Z",
+      "mergedBy": "baumanl",
+      "mergeCommit": {
+        "oid": "36b2bdddc1027829fe8112c4b9f387c792ce67c2"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86aPNI3",
+          "commit": {
+            "abbreviatedOid": "ad4a871"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM with two extremely silly nitpicks. :-)",
+          "createdAt": "2025-01-31T19:36:55Z",
+          "updatedAt": "2025-01-31T19:39:08Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Super nitpicky nitpick: I have never understood whether you are supposed to say \"Client Hello\" or \"ClientHello\" in prose. RFC 8446 uses \"Client Hello\" in section headers, but all the text says \"ClientHello\". I guess that would suggest this should say ClientHello. \ud83e\udd37 ",
+              "createdAt": "2025-01-31T19:36:56Z",
+              "updatedAt": "2025-01-31T19:39:08Z"
+            },
+            {
+              "originalPosition": 4,
+              "body": "Nitpick: I'm not sure if this is actually the style or if I'm just making this up, but I feel like I usually don't see normative text in Introduction sections. I might suggest either moving this to Client Behavior (where we talk about the client extension) or maybe in a separate section after Key Schedule Modifications.",
+              "createdAt": "2025-01-31T19:38:53Z",
+              "updatedAt": "2025-01-31T19:39:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86aPPzu",
+          "commit": {
+            "abbreviatedOid": "ad4a871"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-31T19:40:12Z",
+          "updatedAt": "2025-01-31T19:40:12Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Other reason to move this is that, in the intro, we haven't yet introduced the `pake` extension, so this should probably go somewhere after the point where `pake` is defined.",
+              "createdAt": "2025-01-31T19:40:12Z",
+              "updatedAt": "2025-01-31T19:40:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86aPQeD",
+          "commit": {
+            "abbreviatedOid": "ad4a871"
+          },
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-31T19:41:29Z",
+          "updatedAt": "2025-01-31T19:41:29Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Very true, will move",
+              "createdAt": "2025-01-31T19:41:29Z",
+              "updatedAt": "2025-01-31T19:41:29Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "id": "PR_kwDOM83jm86JsXHD",
+      "title": "rename NamedPAKE to PAKEScheme",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/18",
+      "state": "MERGED",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-01-31T22:12:18Z",
+      "updatedAt": "2025-01-31T23:12:38Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "36b2bdddc1027829fe8112c4b9f387c792ce67c2",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "l_bauman/pake_scheme_rename",
+      "headRefOid": "8077352050f8179b69e3930682239da99c3bcaeb",
+      "closedAt": "2025-01-31T23:12:38Z",
+      "mergedAt": "2025-01-31T23:12:37Z",
+      "mergedBy": "baumanl",
+      "mergeCommit": {
+        "oid": "ce4a7db3df8e9d18f675b11c584a4d961a10de97"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86aQggX",
+          "commit": {
+            "abbreviatedOid": "8077352"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-31T22:57:16Z",
+          "updatedAt": "2025-01-31T22:57:16Z",
           "comments": []
         }
       ]
