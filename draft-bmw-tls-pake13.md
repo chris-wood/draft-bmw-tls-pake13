@@ -338,7 +338,7 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                                     0
                                     |
                                     v
-                      PSK ->  HKDF-Extract = Early Secret
+                        0 ->  HKDF-Extract = Early Secret
                                     |
                                     +-----> Derive-Secret(...)
                                     +-----> Derive-Secret(...)
