@@ -1632,7 +1632,7 @@ as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://
 </pre><a href="#section-6.2-5" class="pilcrow">¶</a>
 </div>
 <p id="section-6.2-6">Note that the server does compute and send confirmV as defined in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>
-since it can do so within the structure of the TLS 1.3 handshake and the client <span class="bcp14">SHOULD</span> verify it.
+since it can do so within the structure of the TLS 1.3 handshake and the client <span class="bcp14">MUST</span> verify it.
 The client and server do not additionally compute or verify confirmP
 as described in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.
 See <a href="#spake2plus-sec" class="auto internal xref">Section 8.1</a> for more information about the safety of this approach.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
