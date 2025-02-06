@@ -367,7 +367,7 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
 ~~~
 
 Note that the server does compute and send confirmV as defined in {{Section 3.4 of SPAKE2PLUS}}
-since it can do so within the structure of the TLS 1.3 handshake and the client SHOULD verify it.
+since it can do so within the structure of the TLS 1.3 handshake and the client MUST verify it.
 The client and server do not additionally compute or verify confirmP
 as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
