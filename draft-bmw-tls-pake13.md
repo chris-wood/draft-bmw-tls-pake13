@@ -227,8 +227,8 @@ extension of type `key_share`, `pre_shared_key`, or `early_data`.
 
 Use of PAKE authentication is not compatible with standard
 certificate-based authentication of both clients and servers. If use
-of a PAKE is negotiated, then servers MUST NOT include a Certificate or
-CertificateRequest message in the handshake.
+of a PAKE is negotiated, then servers MUST NOT include a Certificate,
+CertificateVerify, or CertificateRequest message in the handshake.
 
 ## Key Schedule Modifications
 
