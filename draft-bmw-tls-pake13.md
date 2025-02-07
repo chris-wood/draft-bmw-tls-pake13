@@ -227,8 +227,8 @@ extension of type `key_share`, `pre_shared_key`, or `early_data`.
 
 Use of PAKE authentication is not compatible with standard
 certificate-based authentication of both clients and servers. If use
-of a PAKE is negotiated, then servers MUST NOT include a Certificate or
-CertificateRequest message in the handshake.
+of a PAKE is negotiated, then servers MUST NOT include a Certificate,
+CertificateVerify, or CertificateRequest message in the handshake.
 
 ## Key Schedule Modifications
 
@@ -326,8 +326,9 @@ i.e., `shareV` and `confirmV` concatenated, as computed in {{Section 3.3 of SPAK
 
 Given `shareP` and `shareV`, the client and server can then both compute
 K_main, the root secret in the protocol as described in {{Section 3.4 of SPAKE2PLUS}}.
-The "Context" value for SPAKE2+ is "TLS-SPAKE2PLUS_V1". The rest of the values
-needed for the transcript derivation are as configured in {{spake2plus-setup}},
+The "Context" value for SPAKE2+ may be specified by the application to include additional
+context in the protocol transcript or left empty. See {{Section 3 of SPAKE2PLUS}}. The rest of
+the values needed for the transcript derivation are as configured in {{spake2plus-setup}},
 exchanged over the wire, or computed by client and server.
 
 Using `K_main`, the client and server both compute `K_shared` which is used as
@@ -338,7 +339,7 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                                     0
                                     |
                                     v
-                      PSK ->  HKDF-Extract = Early Secret
+                        0 ->  HKDF-Extract = Early Secret
                                     |
                                     +-----> Derive-Secret(...)
                                     +-----> Derive-Secret(...)
@@ -365,8 +366,10 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                                     +-----> Derive-Secret(...)
 ~~~
 
-Note that the client and server do not additionally compute or verify the key
-confirmation messages as described in {{Section 3.4 of SPAKE2PLUS}}.
+Note that the server does compute and send confirmV as defined in {{Section 3.4 of SPAKE2PLUS}}
+since it can do so within the structure of the TLS 1.3 handshake and the client MUST verify it.
+The client and server do not additionally compute or verify confirmP
+as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
 
 # Privacy Considerations {#privacy}
