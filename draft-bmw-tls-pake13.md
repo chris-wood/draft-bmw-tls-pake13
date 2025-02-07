@@ -204,7 +204,7 @@ If the server has a PAKEScheme in common with the client then the server uses
 the client_identity and server_identity alongside its local database of PAKE
 registration information to determine if the request corresponds to a legitimate
 client registration record. If one does not
-exist, the server simulates a PAKE response as described in {{simulation}}.
+exist, the server MAY simulate a PAKE response as described in {{simulation}}.
 Simulating a response prevents client enumeration attacks on the server's
 PAKE database; see {{security}}.
 
@@ -400,14 +400,16 @@ guess the low-entropy secret.
 
 Clients and servers should apply mitigations against dictionary attacks.
 Reasonable mitigations include rate-limiting authentication attempts,
-imposing a backoff time between attempts, or limiting the total number
+imposing a backoff time between attempts, limiting the
+number of failed attempts, or limiting the total number
 of attempts.
 
-Clients should treat each time they receive an invalid PAKEServerHello
-as a failed authentication attempt for the identity sent in the previously sent PAKEClientHello.
-Servers should treat each time they send a PAKEServerHello extension but do not
-subsequently receive a correct Finished message from the client as a
-failed authentication attempt for the identity in the previously received PAKEClientHello.
+Clients SHOULD treat each time they receive an invalid PAKEServerHello
+as a failed authentication attempt for the identity in the previously sent PAKEClientHello.
+Servers SHOULD treat each time they send a PAKEServerHello extension as a failed
+authentication attempt for the selected identity, until they receive a correct Finished
+message from the client. Once the server receives a correct Finished message,
+the authentication attempt MAY be treated as successful.
 
 ## Protection of client identities
 
