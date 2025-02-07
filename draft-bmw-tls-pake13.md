@@ -253,7 +253,7 @@ To simulate a fake PAKE response, the server does the following:
 * Select a PAKEScheme supported by the client and server, as normal.
 * Include the `pake` extension in its ServerHello, containing a PAKEShare value with
 the selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
-for this `PAKEShare` value, the server should select a value uniformly at random from
+for this `PAKEShare` value, the server selects a value uniformly at random from
 the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
 this would be a random point on the elliptic curve group.
 * Perform the rest of the protocol as normal.
@@ -398,7 +398,7 @@ Because PAKE security is based on knowledge of a low-entropy secret,
 an attacker can perform a "dictionary attack" by repeatedly attempting to
 guess the low-entropy secret.
 
-Clients and servers should apply mitigations against dictionary attacks.
+Clients and servers SHOULD apply mitigations against dictionary attacks.
 Reasonable mitigations include rate-limiting authentication attempts,
 imposing a backoff time between attempts, limiting the
 number of failed attempts, or limiting the total number
