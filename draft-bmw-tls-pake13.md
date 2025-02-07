@@ -250,9 +250,9 @@ otherwise be sending data to an unauthenticated client.
 
 To simulate a fake PAKE response, the server does the following:
 
-* Select a random PAKEScheme supported by the client and server.
+* Select a PAKEScheme supported by the client and server, as normal.
 * Include the `pake` extension in its ServerHello, containing a PAKEShare value with
-the randomly selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
+the selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
 for this `PAKEShare` value, the server should select a value uniformly at random from
 the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
 this would be a random point on the elliptic curve group.
@@ -392,6 +392,25 @@ Applications for which this leak is a problem can use the TLS Encrypted ClientHe
 
 # Security Considerations {#security}
 
+## Dictionary attack mitigation
+
+Because PAKE security is based on knowledge of a low-entropy secret,
+an attacker can perform a "dictionary attack" by repeatedly attempting to
+guess the low-entropy secret.
+
+Clients and servers should apply mitigations against dictionary attacks.
+Reasonable mitigations include rate-limiting authentication attempts,
+imposing a backoff time between attempts, or limiting the total number
+of attempts.
+
+Clients should treat each time they receive an invalid PAKEServerHello
+as a failed authentication attempt for the identity sent in the previously sent PAKEClientHello.
+Servers should treat each time they send a PAKEServerHello extension but do not
+subsequently receive a correct Finished message from the client as a
+failed authentication attempt for the identity in the previously received PAKEClientHello.
+
+## Protection of client identities
+
 Many of the security properties of this protocol will derive from
 the PAKE protocol being used. Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
@@ -400,10 +419,10 @@ If a server doesn't recognize the identity supplied by the
 client in the ClientHello `pake` extension, the server MAY abort the handshake with an
 "illegal_parameter" alert. In this case, the server acts as an oracle
 for identities, in which each handshake allows an attacker
-to learn whether the server recognizes any of the identities in a set.
+to learn whether the server recognizes a given identity.
 
-Alternatively, if the server wishes to hide the fact that these client
-identities are unrecognized, the server MAY simulate the protocol as
+Alternatively, if the server wishes to hide the fact that a client
+identity is unrecognized, the server MAY simulate the protocol as
 if an identity was recognized, but then reject the client's
 Finished message with a "decrypt_error" alert, as if the password was incorrect.
 This is similar to the procedure outlined in {{?RFC5054}}.
