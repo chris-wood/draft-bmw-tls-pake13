@@ -1242,31 +1242,30 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">DISCLAIMER: Much of this text is copied from <span>[<a href="#FIRST-DRAFT" class="cite xref">FIRST-DRAFT</a>]</span>
-and is in the process of being updated.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">DISCLAIMER: This is a work-in-progress draft and has not yet
-seen significant security analysis. See <a href="#security" class="auto internal xref">Section 8</a> and <a href="#spake2plus-sec" class="auto internal xref">Section 8.1</a>
-for more information.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">In some applications, it is desirable to enable a client and server
+and is in the process of being updated. This is a work-in-progress draft and has
+not yet seen significant security analysis. See <a href="#security" class="auto internal xref">Section 8</a> and <a href="#spake2plus-sec" class="auto internal xref">Section 8.1</a>
+for more information.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">In some applications, it is desirable to enable a client and server
 to authenticate to one another using a low-entropy pre-shared value,
-such as a user-entered password.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">In prior versions of TLS, this functionality has been provided by
+such as a user-entered password.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">In prior versions of TLS, this functionality has been provided by
 the integration of the Secure Remote Password PAKE protocol (SRP)
 <span>[<a href="#RFC5054" class="cite xref">RFC5054</a>]</span>. The specific SRP integration described in RFC 5054
 does not immediately extend to TLS 1.3 because it relies on the
 Client Key Exchange and Server Key Exchange messages, which no
-longer exist in 1.3.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">TLS 1.3 itself provides a mechanism for authentication with
+longer exist in 1.3.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">TLS 1.3 itself provides a mechanism for authentication with
 pre-shared keys (PSKs). However, PSKs used with this protocol need
 to be "full-entropy", because the binder values used for
 authentication can be used to mount a dictionary attack on the PSK.
 So while the TLS 1.3 PSK mechanism is suitable for the session
 resumption cases for which it is specified, it cannot be used when
-the client and server share only a low-entropy secret.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">Enabling TLS to address this use case effectively requires the TLS
+the client and server share only a low-entropy secret.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">Enabling TLS to address this use case effectively requires the TLS
 handshake to execute a password-authenticated key establishment
 (PAKE) protocol. This document describes a TLS extension <code>pake</code>
-that can carry data necessary to execute a PAKE.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">This extension is generic, in that it can be used to carry key
+that can carry data necessary to execute a PAKE.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">This extension is generic, in that it can be used to carry key
 exchange information for multiple different PAKEs. We assume that
 prior to the TLS handshake the client and server will both have
 knowledge of the password or PAKE-specific values derived from the
@@ -1274,7 +1273,7 @@ password (e.g. augmented PAKEs only require one party to know the
 actual password). The choice of PAKE and any required parameters will
 be explicitly specified using IANA assigned values. As a first
 case, this document defines a concrete protocol for executing the
-SPAKE2+ PAKE protocol <span>[<a href="#RFC9383" class="cite xref">RFC9383</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
+SPAKE2+ PAKE protocol <span>[<a href="#RFC9383" class="cite xref">RFC9383</a>]</span>.<a href="#section-1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="terminology">
@@ -1384,7 +1383,9 @@ client enumeration attacks; see <a href="#security" class="auto internal xref">S
 support multiple PAKEs and negotiate which to use in the context of
 the handshake. For instance, if a client knows a password but not which
 PAKE the server supports it could send corresponding PAKEShares for each
-PAKE.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
+PAKE. If the client sends multiple PAKEShare values, then they <span class="bcp14">MUST</span>
+be sorted in monotonically increasing order by the NamedPAKE value. Moreover,
+the client <span class="bcp14">MUST NOT</span> send more than one PAKEShare with the same NamedPAKE value.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
 <p id="section-4.1-9"><span><a href="https://rfc-editor.org/rfc/rfc8446#section-9.2" class="relref">Section 9.2</a> of [<a href="#TLS13" class="cite xref">TLS13</a>]</span> specifies that a valid ClientHello
 must include either a <code>pre_shared_key</code> extension or both
 a <code>signature_algorithms</code> and <code>supported_groups</code> extension. With the
@@ -1419,9 +1420,10 @@ ServerNameIndication (SNI) field.<a href="#section-4.1-12" class="pilcrow">¶</a
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-server-behavior" class="section-name selfRef">Server Behavior</a>
         </h3>
 <p id="section-4.2-1">A server that receives a <code>pake</code> extension examines its contents to determine
-if it is well-formed. In particular, if there are duplicate PAKEShare values
-in the PAKEClientHello structure for the same PAKEScheme, the server aborts the
-handshake with an "illegal_parameter" alert.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+if it is well-formed. In particular, if the list of PAKEShare values is not
+sorted in monotonically increasing order by PAKEScheme values, or if there are
+duplicate PAKEScheme entries in this list, the server aborts the handshake with
+an "illegal_parameter" alert.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.2-2">If the list of PAKEShare values is well-formed, the server then scans the list
 of PAKEShare values to determine if there is one corresponding to a server
 supported PAKEScheme. If the server does not support any of the offered PAKESchemes
