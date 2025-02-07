@@ -254,8 +254,7 @@ To simulate a fake PAKE response, the server does the following:
 * Include the `pake` extension in its ServerHello, containing a PAKEShare value with
 the selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
 for this `PAKEShare` value, the server selects a value uniformly at random from
-the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
-this would be a random point on the elliptic curve group.
+the set of possible values of the PAKE algorithm shares.
 * Perform the rest of the protocol as normal.
 
 Because the server's share was selected uniformly at random, the server will reject
@@ -369,6 +368,7 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
 
 Note that the server does compute and send confirmV as defined in {{Section 3.4 of SPAKE2PLUS}}
 since it can do so within the structure of the TLS 1.3 handshake and the client MUST verify it.
+If verification of confirmV fails, clients SHOULD abort the handshake with a "decrypt_error" alert.
 The client and server do not additionally compute or verify confirmP
 as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
@@ -425,8 +425,7 @@ to learn whether the server recognizes a given identity.
 
 Alternatively, if the server wishes to hide the fact that a client
 identity is unrecognized, the server MAY simulate the protocol as
-if an identity was recognized, but then reject the client's
-Finished message with a "decrypt_error" alert, as if the password was incorrect.
+if an identity was recognized, but the password was incorrect.
 This is similar to the procedure outlined in {{?RFC5054}}.
 The simulation mechanism is described in {{simulation}}.
 
