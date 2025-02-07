@@ -204,7 +204,7 @@ If the server has a PAKEScheme in common with the client then the server uses
 the client_identity and server_identity alongside its local database of PAKE
 registration information to determine if the request corresponds to a legitimate
 client registration record. If one does not
-exist, the server simulates a PAKE response as described in {{simulation}}.
+exist, the server MAY simulate a PAKE response as described in {{simulation}}.
 Simulating a response prevents client enumeration attacks on the server's
 PAKE database; see {{security}}.
 
@@ -250,12 +250,11 @@ otherwise be sending data to an unauthenticated client.
 
 To simulate a fake PAKE response, the server does the following:
 
-* Select a random PAKEScheme supported by the client and server.
+* Select a PAKEScheme supported by the client and server, as normal.
 * Include the `pake` extension in its ServerHello, containing a PAKEShare value with
-the randomly selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
-for this `PAKEShare` value, the server should select a value uniformly at random from
-the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
-this would be a random point on the elliptic curve group.
+the selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
+for this `PAKEShare` value, the server selects a value uniformly at random from
+the set of possible values of the PAKE algorithm shares.
 * Perform the rest of the protocol as normal.
 
 Because the server's share was selected uniformly at random, the server will reject
@@ -369,6 +368,7 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
 
 Note that the server does compute and send confirmV as defined in {{Section 3.4 of SPAKE2PLUS}}
 since it can do so within the structure of the TLS 1.3 handshake and the client MUST verify it.
+If verification of confirmV fails, clients SHOULD abort the handshake with a "decrypt_error" alert.
 The client and server do not additionally compute or verify confirmP
 as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
@@ -392,6 +392,27 @@ Applications for which this leak is a problem can use the TLS Encrypted ClientHe
 
 # Security Considerations {#security}
 
+## Dictionary attack mitigation
+
+Because PAKE security is based on knowledge of a low-entropy secret,
+an attacker can perform a "dictionary attack" by repeatedly attempting to
+guess the low-entropy secret.
+
+Clients and servers SHOULD apply mitigations against dictionary attacks.
+Reasonable mitigations include rate-limiting authentication attempts,
+imposing a backoff time between attempts, limiting the
+number of failed attempts, or limiting the total number
+of attempts.
+
+Clients SHOULD treat each time they receive an invalid PAKEServerHello
+as a failed authentication attempt for the identity in the previously sent PAKEClientHello.
+Servers SHOULD treat each time they send a PAKEServerHello extension as a failed
+authentication attempt for the selected identity, until they receive a correct Finished
+message from the client. Once the server receives a correct Finished message,
+the authentication attempt MAY be treated as successful.
+
+## Protection of client identities
+
 Many of the security properties of this protocol will derive from
 the PAKE protocol being used. Security considerations for PAKE
 protocols are noted in {{compatible-pake-protocols}}.
@@ -400,12 +421,11 @@ If a server doesn't recognize the identity supplied by the
 client in the ClientHello `pake` extension, the server MAY abort the handshake with an
 "illegal_parameter" alert. In this case, the server acts as an oracle
 for identities, in which each handshake allows an attacker
-to learn whether the server recognizes any of the identities in a set.
+to learn whether the server recognizes a given identity.
 
-Alternatively, if the server wishes to hide the fact that these client
-identities are unrecognized, the server MAY simulate the protocol as
-if an identity was recognized, but then reject the client's
-Finished message with a "decrypt_error" alert, as if the password was incorrect.
+Alternatively, if the server wishes to hide the fact that a client
+identity is unrecognized, the server MAY simulate the protocol as
+if an identity was recognized, but the password was incorrect.
 This is similar to the procedure outlined in {{?RFC5054}}.
 The simulation mechanism is described in {{simulation}}.
 
