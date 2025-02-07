@@ -39,10 +39,8 @@ password-authenticated key exchange protocols with TLS 1.3.
 # Introduction
 
 DISCLAIMER: Much of this text is copied from {{?FIRST-DRAFT=I-D.barnes-tls-pake}}
-and is in the process of being updated.
-
-DISCLAIMER: This is a work-in-progress draft and has not yet
-seen significant security analysis. See {{security}} and {{spake2plus-sec}}
+and is in the process of being updated. This is a work-in-progress draft and has
+not yet seen significant security analysis. See {{security}} and {{spake2plus-sec}}
 for more information.
 
 In some applications, it is desirable to enable a client and server
@@ -162,7 +160,9 @@ The `PAKEScheme` field in the `PAKEShare` allows implementations to
 support multiple PAKEs and negotiate which to use in the context of
 the handshake. For instance, if a client knows a password but not which
 PAKE the server supports it could send corresponding PAKEShares for each
-PAKE.
+PAKE. If the client sends multiple PAKEShare values, then they MUST
+be sorted in monotonically increasing order by the NamedPAKE value. Moreover,
+the client MUST NOT send more than one PAKEShare with the same NamedPAKE value.
 
 {{Section 9.2 of !TLS13=RFC8446}} specifies that a valid ClientHello
 must include either a `pre_shared_key` extension or both
@@ -189,9 +189,10 @@ ServerNameIndication (SNI) field.
 ## Server Behavior
 
 A server that receives a `pake` extension examines its contents to determine
-if it is well-formed. In particular, if there are duplicate PAKEShare values
-in the PAKEClientHello structure for the same PAKEScheme, the server aborts the
-handshake with an "illegal_parameter" alert.
+if it is well-formed. In particular, if the list of PAKEShare values is not
+sorted in monotonically increasing order by PAKEScheme values, or if there are
+duplicate PAKEScheme entries in this list, the server aborts the handshake with
+an "illegal_parameter" alert.
 
 If the list of PAKEShare values is well-formed, the server then scans the list
 of PAKEShare values to determine if there is one corresponding to a server
