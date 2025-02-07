@@ -311,8 +311,7 @@ Table of Contents
       PAKEShare value with the selected PAKEScheme and corresponding
       pake_message.  To generate the pake_message for this PAKEShare
       value, the server selects a value uniformly at random from the set
-      of possible values of the PAKE algorithm shares.  For example, for
-      SPAKE2+, this would be a random point on the elliptic curve group.
+      of possible values of the PAKE algorithm shares.
 
    *  Perform the rest of the protocol as normal.
 
@@ -442,10 +441,12 @@ Table of Contents
 
    Note that the server does compute and send confirmV as defined in
    Section 3.4 of [SPAKE2PLUS] since it can do so within the structure
-   of the TLS 1.3 handshake and the client MUST verify it.  The client
-   and server do not additionally compute or verify confirmP as
-   described in Section 3.4 of [SPAKE2PLUS].  See Section 8.3 for more
-   information about the safety of this approach.
+   of the TLS 1.3 handshake and the client MUST verify it.  If
+   verification of confirmV fails, clients SHOULD abort the handshake
+   with a "decrypt_error" alert.  The client and server do not
+   additionally compute or verify confirmP as described in Section 3.4
+   of [SPAKE2PLUS].  See Section 8.3 for more information about the
+   safety of this approach.
 
 7.  Privacy Considerations
 
@@ -502,10 +503,9 @@ Table of Contents
 
    Alternatively, if the server wishes to hide the fact that a client
    identity is unrecognized, the server MAY simulate the protocol as if
-   an identity was recognized, but then reject the client's Finished
-   message with a "decrypt_error" alert, as if the password was
-   incorrect.  This is similar to the procedure outlined in [RFC5054].
-   The simulation mechanism is described in Section 4.4.
+   an identity was recognized, but the password was incorrect.  This is
+   similar to the procedure outlined in [RFC5054].  The simulation
+   mechanism is described in Section 4.4.
 
 8.3.  SPAKE2+ Security Considerations
 

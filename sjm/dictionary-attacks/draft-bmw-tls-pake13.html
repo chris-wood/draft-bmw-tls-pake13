@@ -1496,8 +1496,7 @@ otherwise be sending data to an unauthenticated client.<a href="#section-4.3-2" 
             <p id="section-4.4-2.2.1">Include the <code>pake</code> extension in its ServerHello, containing a PAKEShare value with
 the selected PAKEScheme and corresponding <code>pake_message</code>. To generate the <code>pake_message</code>
 for this <code>PAKEShare</code> value, the server selects a value uniformly at random from
-the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
-this would be a random point on the elliptic curve group.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
+the set of possible values of the PAKE algorithm shares.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.4-2.3">
             <p id="section-4.4-2.3.1">Perform the rest of the protocol as normal.<a href="#section-4.4-2.3.1" class="pilcrow">¶</a></p>
@@ -1641,6 +1640,7 @@ as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://
 </div>
 <p id="section-6.2-6">Note that the server does compute and send confirmV as defined in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>
 since it can do so within the structure of the TLS 1.3 handshake and the client <span class="bcp14">MUST</span> verify it.
+If verification of confirmV fails, clients <span class="bcp14">SHOULD</span> abort the handshake with a "decrypt_error" alert.
 The client and server do not additionally compute or verify confirmP
 as described in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.
 See <a href="#spake2plus-sec" class="auto internal xref">Section 8.3</a> for more information about the safety of this approach.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
@@ -1708,8 +1708,7 @@ for identities, in which each handshake allows an attacker
 to learn whether the server recognizes a given identity.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
 <p id="section-8.2-3">Alternatively, if the server wishes to hide the fact that a client
 identity is unrecognized, the server <span class="bcp14">MAY</span> simulate the protocol as
-if an identity was recognized, but then reject the client's
-Finished message with a "decrypt_error" alert, as if the password was incorrect.
+if an identity was recognized, but the password was incorrect.
 This is similar to the procedure outlined in <span>[<a href="#RFC5054" class="cite xref">RFC5054</a>]</span>.
 The simulation mechanism is described in <a href="#simulation" class="auto internal xref">Section 4.4</a>.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
 </section>
