@@ -119,10 +119,10 @@ structure:
 ~~~~~
 enum {
     SPAKE2PLUS_V1 (0xXXXX),
-} NamedPAKE;
+} PAKEScheme;
 
 struct {
-    NamedPAKE   named_pake;
+    PAKEScheme   pake_scheme;
     opaque      pake_message<1..2^16-1>;
 } PAKEShare;
 
@@ -139,7 +139,7 @@ client's first message for each underlying PAKE protocol.
 Concretely, these structure fields are defined as follows:
 
 client_shares
-: A list of PAKEShare values, each one with a distinct NamedPAKE algorithm.
+: A list of PAKEShare values, each one with a distinct PAKEScheme algorithm.
 
 client_identity
 : The client identity used for the PAKE. It may be empty.
@@ -147,7 +147,7 @@ client_identity
 server_identity
 : The server identity used for the PAKE. It may be empty.
 
-named_pake
+pake_scheme
 : The 2-byte identifier of the PAKE algorithm.
 
 pake_message
@@ -156,13 +156,24 @@ pake_message
 The client and server identity fields are common to all PAKEShares to prevent
 client enumeration attacks; see {{security}}.
 
-The `NamedPAKE` field in the `PAKEShare` allows implementations to
+The `PAKEScheme` field in the `PAKEShare` allows implementations to
 support multiple PAKEs and negotiate which to use in the context of
 the handshake. For instance, if a client knows a password but not which
 PAKE the server supports it could send corresponding PAKEShares for each
 PAKE. If the client sends multiple PAKEShare values, then they MUST
 be sorted in monotonically increasing order by the NamedPAKE value. Moreover,
 the client MUST NOT send more than one PAKEShare with the same NamedPAKE value.
+
+{{Section 9.2 of !TLS13=RFC8446}} specifies that a valid ClientHello
+must include either a `pre_shared_key` extension or both
+a `signature_algorithms` and `supported_groups` extension. With the
+addition of the `pake` extension specified here, the new requirement
+is that a valid ClientHello must satisfy at least one of the
+following options:
+
+* includes a `pre_shared_key` extension
+* includes both a `signature_algorithms` and `supported_groups` extensions
+* includes a `pake` extension
 
 If a client sends the `pake` extension, then it MAY also send the
 `key_share` and `pre_shared_key` extensions, to allow the server to
@@ -179,17 +190,17 @@ ServerNameIndication (SNI) field.
 
 A server that receives a `pake` extension examines its contents to determine
 if it is well-formed. In particular, if the list of PAKEShare values is not
-sorted in monotonically increasing order by NamedPAKE values, or if there are
-duplicate NamedPAKE entries in this list, the server aborts the handshake with
+sorted in monotonically increasing order by PAKEScheme values, or if there are
+duplicate PAKEScheme entries in this list, the server aborts the handshake with
 an "illegal_parameter" alert.
 
 If the list of PAKEShare values is well-formed, the server then scans the list
 of PAKEShare values to determine if there is one corresponding to a server
-supported NamedPAKE. If the server does not support any of the offered NamedPAKEs
+supported PAKEScheme. If the server does not support any of the offered PAKESchemes
 in the client PAKEShares then the server MUST abort the protocol
 with an "illegal_parameter" alert.
 
-If the server has a NamedPAKE in common with the client then the server uses
+If the server has a PAKEScheme in common with the client then the server uses
 the client_identity and server_identity alongside its local database of PAKE
 registration information to determine if the request corresponds to a legitimate
 client registration record. If one does not
@@ -217,8 +228,8 @@ extension of type `key_share`, `pre_shared_key`, or `early_data`.
 
 Use of PAKE authentication is not compatible with standard
 certificate-based authentication of both clients and servers. If use
-of a PAKE is negotiated, then servers MUST NOT include a Certificate or
-CertificateRequest message in the handshake.
+of a PAKE is negotiated, then servers MUST NOT include a Certificate,
+CertificateVerify, or CertificateRequest message in the handshake.
 
 ## Key Schedule Modifications
 
@@ -239,9 +250,9 @@ otherwise be sending data to an unauthenticated client.
 
 To simulate a fake PAKE response, the server does the following:
 
-* Select a random NamedPAKE supported by the client and server.
+* Select a random PAKEScheme supported by the client and server.
 * Include the `pake` extension in its ServerHello, containing a PAKEShare value with
-the randomly selected NamedPAKE and corresponding `pake_message`. To generate the `pake_message`
+the randomly selected PAKEScheme and corresponding `pake_message`. To generate the `pake_message`
 for this `PAKEShare` value, the server should select a value uniformly at random from
 the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
 this would be a random point on the elliptic curve group.
@@ -263,7 +274,7 @@ must be compatible with the message flow described above.  A
 specification describing the use of a particular PAKE protocol with
 TLS must provide the following details:
 
-* A `NamedPAKE` registered value indicating pre-provisioned parameters;
+* A `PAKEScheme` registered value indicating pre-provisioned parameters;
 * Content of the `pake_message` field in a ClientHello;
 * Content of the `pake_message` field in a ServerHello;
 * How the PAKE protocol is executed based on those messages; and
@@ -298,26 +309,27 @@ use this list when completing the SPAKE2+ protocol. The values for the password
 verifiers and registration records (w0, w1, and L) are not specified here; see
 {{Section 3.2 of SPAKE2PLUS}} for more information.
 
-The NamedPake value for SPAKE2+ fully defines the parameters associated with
+The PAKEScheme value for SPAKE2+ fully defines the parameters associated with
 the protocol, including the prime-order group `G`, cryptographic hash function `Hash`,
 key derivation function `KDF`, and message authentication code `MAC`. Additionally,
-the NamedPake value for SPAKE2+ fully defines the constants for M and N
+the PAKEScheme value for SPAKE2+ fully defines the constants for M and N
 as needed for the protocol; see {{Section 4 of SPAKE2PLUS}}.
 
 ## Protocol Execution {#spake2plus-run}
 
 The content of one PAKEShare value in the PAKEClientHello structure consists
-of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareP` as computed in
+of the PAKEScheme value `SPAKE2PLUS_V1` and the value `shareP` as computed in
 {{Section 3.3 of SPAKE2PLUS}}.
 
 The content of the server PAKEShare value in the PAKEServerHello structure
-consists of the NamedPAKE value `SPAKE2PLUS_V1` and the value `shareV` as
-computed in {{Section 3.3 of SPAKE2PLUS}}.
+consists of the PAKEScheme value `SPAKE2PLUS_V1` and the value `shareV || confirmV`,
+i.e., `shareV` and `confirmV` concatenated, as computed in {{Section 3.3 of SPAKE2PLUS}}.
 
 Given `shareP` and `shareV`, the client and server can then both compute
 K_main, the root secret in the protocol as described in {{Section 3.4 of SPAKE2PLUS}}.
-The "Context" value for SPAKE2+ is "TLS-SPAKE2PLUS_V1". The rest of the values
-needed for the transcript derivation are as configured in {{spake2plus-setup}},
+The "Context" value for SPAKE2+ may be specified by the application to include additional
+context in the protocol transcript or left empty. See {{Section 3 of SPAKE2PLUS}}. The rest of
+the values needed for the transcript derivation are as configured in {{spake2plus-setup}},
 exchanged over the wire, or computed by client and server.
 
 Using `K_main`, the client and server both compute `K_shared` which is used as
@@ -328,7 +340,7 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                                     0
                                     |
                                     v
-                      PSK ->  HKDF-Extract = Early Secret
+                        0 ->  HKDF-Extract = Early Secret
                                     |
                                     +-----> Derive-Secret(...)
                                     +-----> Derive-Secret(...)
@@ -355,8 +367,10 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                                     +-----> Derive-Secret(...)
 ~~~
 
-Note that the client and server do not additionally compute or verify the key
-confirmation messages as described in {{Section 3.4 of SPAKE2PLUS}}.
+Note that the server does compute and send confirmV as defined in {{Section 3.4 of SPAKE2PLUS}}
+since it can do so within the structure of the TLS 1.3 handshake and the client MUST verify it.
+The client and server do not additionally compute or verify confirmP
+as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
 
 # Privacy Considerations {#privacy}
@@ -419,16 +433,16 @@ ExtensionType Registry with the following contents:
 value assigned by IANA, and replace "(this document)" with the
 RFC number assigned to this document. ]]
 
-## Named PAKE registry
+## PAKE Scheme registry
 
 This document requests that IANA create a new registry called
-"Named PAKE Algorithms" with the following contents:
+"PAKE Schemes" with the following contents:
 
-| Value   | Named PAKE | Reference | Notes |
+| Value   | PAKEScheme | Reference | Notes |
 |:--------|:-----------|:---------:|:------|
 | 0xTODO  | SPAKE2PLUS_V1 | (this document) | N/A |
 
-The SPAKE2PLUS_V1 NamedPAKE variant has the following parameters associated with it:
+The SPAKE2PLUS_V1 PAKEScheme variant has the following parameters associated with it:
 
 * G: P-256
 * Hash: SHA256
