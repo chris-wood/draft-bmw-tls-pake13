@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-06T00:17:06.639583+00:00",
+  "timestamp": "2025-02-09T00:18:10.150623+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -159,15 +159,15 @@
       "id": "I_kwDOM83jm86d-Jh8",
       "title": "Check interactions with other TLS 1.3 features",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/5",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "menonsamir",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "From IETF discussion with @BjoernMHaase, @FrankXL, and @bifurcation:\r\n\r\nWe should ensure there aren't unexpected or confusing interactions between our proposal and other TLS features.\r\n\r\nThe main example brought up so far was resumption tickets. @BjoernMHaase, can you add more detail on your thoughts for those? Thanks!",
       "createdAt": "2024-11-11T20:25:03Z",
-      "updatedAt": "2024-11-12T13:10:51Z",
-      "closedAt": null,
+      "updatedAt": "2025-02-07T20:08:18Z",
+      "closedAt": "2025-02-07T20:08:17Z",
       "comments": [
         {
           "author": "BjoernMHaase",
@@ -175,6 +175,13 @@
           "body": "Yes. I'd suggest that one digs through all of the subchapters of the full TLS protocol RFC and looks whether we may have to specify something here which may be specific for PAKE protocols.",
           "createdAt": "2024-11-12T13:10:50Z",
           "updatedAt": "2024-11-12T13:10:50Z"
+        },
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I read through the 8446 with an eye out for anything affected by the addition of the PAKE extension. Going to close this issue and further discussion can be done on the specific concerns we have.\n\nThe main interactions that stood out to me, but that I believe we've already addressed in the draft:\n\n- The PAKE extension provides another key exchange mechanism beyond (EC)DHE, PSK + (EC)DHE, and PSK only. The PAKE provides forward secrecy and replaces the (EC)DHE input to the key schedule.\n\n- The PAKE extension provides another authentication mechanism beyond PSKs + certificate based flows.\n\n- As previously brought up by @davidben and addressed in https://github.com/chris-wood/draft-bmw-tls-pake13/issues/16, the requirements on a valid Client Hello have changed. \n\n- Hello Retry Requests are not specified as a mechanism to influence the client to offer different PAKESchemes (discussed in https://github.com/chris-wood/draft-bmw-tls-pake13/issues/12)\n\n-  I do not see any major conflicts or points of interest between the pake extension and resumption.  In attempting to resume a client can also provide a \"pake\" extension to allow fall back to a PAKE auth flow if resumption is not accepted by the server. Like with resumption of a session authenticated with certificates, indefinitely extending the lifetime of the original handshake is probably not a good idea (but 8446 already says this without specifying the auth mechanism specifically). If there is a specific concern here let's open up a separate issue to discuss.\n\n\nNew points I thought of that may warrant changes (most of these are pretty small). I will file separate issues for these:\n\n- We already mention that to prevent client enumeration attacks the server should simulate a response if it does not recognize any of the PAKEShares, but does share a PAKEScheme with the client. It may be good to additionally mention that if the client offers multiple key exchange options (e.g. PSK and pake extension) then the server should have a set preference between those two options instead of say, only using the PSK if none of the PAKEShares are recognized. \n\n- Do we need to specify any interaction of post handshake auth + the pake handshake? By default I would expect the client sending the post_handshake_auth extension along with the pake extension to be valid and the server sending a CertificateRequest after the handshake has completed. (Not sure what the use case of this would be, but if we don't want to allow it we should specify that in the draft.)\n\n- We recently changed the draft to allow the SPAKE2+ context string to be set by the application instead of hardcoded to a TLS specific value. Should we instead split down the middle and have a hardcoded prefix + application specific context? This may help mitigate cross-protocol attacks.\n\n- We should specify what the client does if verification of confirmV fails. ",
+          "createdAt": "2025-02-07T20:08:17Z",
+          "updatedAt": "2025-02-07T20:08:17Z"
         }
       ]
     },
@@ -364,15 +371,15 @@
       "id": "I_kwDOM83jm86h4Uvb",
       "title": "PAKE IDs MUST be sent in increasing order",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/10",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "chris-wood",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "This would avoid complicated code to parse the list of PAKE shares and check for duplicates.",
       "createdAt": "2024-12-03T20:16:49Z",
-      "updatedAt": "2025-01-14T21:36:56Z",
-      "closedAt": null,
+      "updatedAt": "2025-02-07T20:06:05Z",
+      "closedAt": "2025-02-07T20:06:05Z",
       "comments": [
         {
           "author": "chris-wood",
@@ -419,7 +426,7 @@
       "id": "I_kwDOM83jm86lvllz",
       "title": "Draft should discuss rate-limiting and brute forcing the low-entropy secret",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/14",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -428,8 +435,8 @@
       "labels": [],
       "body": "Since PAKEs are used with low-entropy secrets and an attacker can still use a single connection to confirm a guess about the secret, ISTM that TLS-PAKE can never be used without a very tight handle on that.\r\n\r\nFrom what I can tell, at minimum:\r\n\r\n* If you are a client, I _think_ you only need to count failures, i.e. bad confirmV strings from the server. Correct confirmV strings don't contribute to an attacker's ability to guess the secret\r\n* If you are a server, I _think_ you need need to count both failures and incomplete handshakes, because the server sends confirmV before the client sends \"confirmP\"/Finished\r\n\r\nOf course, those are pretty invasive, so if that isn't done deep in the TLS implementation, you might need to limit more things, which gets even more restrictive as to what applications can usefully use this. How much of a limit you can tolerate probably depends on the entropy of the low-entropy secret.\r\n\r\nThis is all extra fun because that means the server actually needs to limit parallel incoming connections from a client. This, in turn, means that TLS-PAKE is probably not appropriate for more typical TLS uses that freely make connections, and instead you should use like one special-purpose TLS-PAKE connection to establish more robust credentials first, and then use that to freely make connection.\r\n\r\nWe probably need text in the I-D somewhere discussing all this.",
       "createdAt": "2025-01-10T17:34:21Z",
-      "updatedAt": "2025-01-14T21:29:27Z",
-      "closedAt": null,
+      "updatedAt": "2025-02-07T21:39:02Z",
+      "closedAt": "2025-02-07T21:39:02Z",
       "comments": [
         {
           "author": "chris-wood",
@@ -499,6 +506,69 @@
       "createdAt": "2025-01-27T20:39:43Z",
       "updatedAt": "2025-01-31T19:44:59Z",
       "closedAt": "2025-01-31T19:44:59Z",
+      "comments": []
+    },
+    {
+      "number": 21,
+      "id": "I_kwDOM83jm86pOEaV",
+      "title": "Server choice between PSK/PAKE/Certs  + client enumeration",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/21",
+      "state": "OPEN",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We already mention that to prevent client enumeration attacks the server should simulate a response if it does not recognize any of the PAKEShares, but does share a PAKEScheme with the client. It may be good to additionally mention that if the client offers multiple key exchange options (e.g. PSK and pake extension) then the server should have a set preference between those two options instead of say, only using the PSK if none of the PAKEShares are recognized. Otherwise there is an additional, slightly different client enumeration attack.",
+      "createdAt": "2025-02-07T20:33:23Z",
+      "updatedAt": "2025-02-07T20:33:23Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOM83jm86pOEjn",
+      "title": "Post handshake auth?",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/22",
+      "state": "CLOSED",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Do we need to specify any interaction of post handshake auth + the pake handshake? By default I would expect the client sending the post_handshake_auth extension along with the pake extension to be valid and the server sending a CertificateRequest after the handshake has completed. (Not sure what the use case of this would be, but if we don't want to allow it we should specify that in the draft.)",
+      "createdAt": "2025-02-07T20:33:50Z",
+      "updatedAt": "2025-02-07T21:13:33Z",
+      "closedAt": "2025-02-07T21:13:32Z",
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "PSKs don't ban it either, right? In that case, I think I'd agree. (Though we don't implement PHA so I haven't paid too much attention to how it works.)",
+          "createdAt": "2025-02-07T21:05:45Z",
+          "updatedAt": "2025-02-07T21:05:45Z"
+        },
+        {
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Great, matches my thoughts. Closing.",
+          "createdAt": "2025-02-07T21:13:32Z",
+          "updatedAt": "2025-02-07T21:13:32Z"
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "id": "I_kwDOM83jm86pOEvv",
+      "title": "SPAKE2+ Context String?",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/23",
+      "state": "OPEN",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We recently changed the draft to allow the SPAKE2+ context string to be set by the application instead of hardcoded to a TLS specific value. Should we instead split down the middle and have a hardcoded prefix + application specific context? This may help mitigate cross-protocol attacks.",
+      "createdAt": "2025-02-07T20:34:23Z",
+      "updatedAt": "2025-02-07T20:34:23Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -673,24 +743,26 @@
       "id": "PR_kwDOM83jm86D8g6K",
       "title": "Sort to simplify duplicate detection",
       "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/11",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "chris-wood",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #10 ",
       "createdAt": "2024-12-03T21:21:00Z",
-      "updatedAt": "2025-01-31T19:35:08Z",
+      "updatedAt": "2025-02-07T20:06:04Z",
       "baseRepository": "chris-wood/draft-bmw-tls-pake13",
       "baseRefName": "main",
-      "baseRefOid": "e32284368db47b9dd890e973443a87e1a7a30ac3",
+      "baseRefOid": "20deb76c4cd7bb6f2bb4e532cc0d13baadc4e9c3",
       "headRepository": "chris-wood/draft-bmw-tls-pake13",
       "headRefName": "caw/sort",
-      "headRefOid": "9c0f42615a4d3646a52bd6210ee7949b3b611295",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "1578be040eaacffc8ba0c164728a073fd9be3164",
+      "closedAt": "2025-02-07T20:06:04Z",
+      "mergedAt": "2025-02-07T20:06:04Z",
+      "mergedBy": "chris-wood",
+      "mergeCommit": {
+        "oid": "a5e3dd2dbf93be56c79e9cfafa557ad02a9678f1"
+      },
       "comments": [
         {
           "author": "davidben",
@@ -698,6 +770,13 @@
           "body": "FWIW, this is the version we ended up implementing in BoringSSL. Purely because we already had the code for it and I was too lazy to change it. :-) Though if folks particularly want it to not be sorted, I can go back and tweak it. One way or another, I think we should either:\r\n\r\n* Say it is a client preference order\r\n* Say it is sorted\r\n\r\nRight now I think we say neither. But also I assume everything about negotiation will get reworked to no end later anyway.",
           "createdAt": "2025-01-31T19:35:06Z",
           "updatedAt": "2025-01-31T19:35:06Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "@davidben Agreed -- let's just merge this and acknowledge that it'll change later \ud83d\ude06 ",
+          "createdAt": "2025-02-07T20:05:58Z",
+          "updatedAt": "2025-02-07T20:05:58Z"
         }
       ],
       "reviews": [
@@ -891,6 +970,229 @@
           "body": "",
           "createdAt": "2025-01-31T22:57:16Z",
           "updatedAt": "2025-01-31T22:57:16Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "id": "PR_kwDOM83jm86KU5jB",
+      "title": "L bauman/cleanup",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/19",
+      "state": "MERGED",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Four very small changes I didn't want to do separately trying to cleanup wording/make the draft text align better with what we've discussed where it looked like it diverged.",
+      "createdAt": "2025-02-06T19:47:46Z",
+      "updatedAt": "2025-02-07T04:25:25Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "ce4a7db3df8e9d18f675b11c584a4d961a10de97",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "l_bauman/cleanup",
+      "headRefOid": "1f5b3bca4ea8b9851d7fc72d22143c8ef909f89c",
+      "closedAt": "2025-02-07T04:25:25Z",
+      "mergedAt": "2025-02-07T04:25:25Z",
+      "mergedBy": "baumanl",
+      "mergeCommit": {
+        "oid": "20deb76c4cd7bb6f2bb4e532cc0d13baadc4e9c3"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86a9SD8",
+          "commit": {
+            "abbreviatedOid": "1f880a8"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-06T19:56:38Z",
+          "updatedAt": "2025-02-06T19:56:38Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "Should we just make it a MUST? Otherwise we have to reason about how the cipher suite''s AEAD performs as a key confirmer.",
+              "createdAt": "2025-02-06T19:56:38Z",
+              "updatedAt": "2025-02-06T19:56:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86a9dZp",
+          "commit": {
+            "abbreviatedOid": "1f880a8"
+          },
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-06T20:13:32Z",
+          "updatedAt": "2025-02-06T20:13:32Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "Yeah, I'm fine with a MUST. ",
+              "createdAt": "2025-02-06T20:13:32Z",
+              "updatedAt": "2025-02-06T20:13:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86a_OEY",
+          "commit": {
+            "abbreviatedOid": "1f5b3bc"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-06T23:41:15Z",
+          "updatedAt": "2025-02-06T23:41:15Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOM83jm86bBEj5",
+          "commit": {
+            "abbreviatedOid": "1f5b3bc"
+          },
+          "author": "menonsamir",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-07T03:55:04Z",
+          "updatedAt": "2025-02-07T03:55:04Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "id": "PR_kwDOM83jm86KXduE",
+      "title": "Add dictionary attack mitigations to security considerations (resolves #14)",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/20",
+      "state": "MERGED",
+      "author": "menonsamir",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Adds language to security considerations on what counts as a failed authentication attempt for the purposes of mitigating dictionary attacks. Also fixes a small point in the simulation text.\r\n\r\nResolves #14.",
+      "createdAt": "2025-02-07T03:50:09Z",
+      "updatedAt": "2025-02-07T21:39:01Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "a5e3dd2dbf93be56c79e9cfafa557ad02a9678f1",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "sjm/dictionary-attacks",
+      "headRefOid": "ba9dce26931b9e43558a35bb3c127f827b96bae1",
+      "closedAt": "2025-02-07T21:39:01Z",
+      "mergedAt": "2025-02-07T21:39:01Z",
+      "mergedBy": "menonsamir",
+      "mergeCommit": {
+        "oid": "c307f0d0710d116e6088befbe54d390567da4a49"
+      },
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Oops, Chris and I crossed midair and commented on similar parts. Feel free to take whatever linear combination you think is appropriate. :-)",
+          "createdAt": "2025-02-07T20:11:00Z",
+          "updatedAt": "2025-02-07T20:11:00Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86bImqP",
+          "commit": {
+            "abbreviatedOid": "f1bd914"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-07T20:03:18Z",
+          "updatedAt": "2025-02-07T20:04:19Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "```suggestion\r\nClients SHOULD treat each time they receive an invalid PAKEServerHello\r\n```",
+              "createdAt": "2025-02-07T20:03:18Z",
+              "updatedAt": "2025-02-07T20:04:19Z"
+            },
+            {
+              "originalPosition": 29,
+              "body": "```suggestion\r\nServers SHOULD treat each time they send a PAKEServerHello extension but do not\r\n```",
+              "createdAt": "2025-02-07T20:03:27Z",
+              "updatedAt": "2025-02-07T20:04:19Z"
+            },
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\r\nfailed authentication attempt for the identity in the previously received PAKEClientHello.\r\nWhile connections can fail for a variety of reasons, it is most conservative for servers\r\nto treat connection failures as failed authentication attempts by an attacker.\r\n```",
+              "createdAt": "2025-02-07T20:04:12Z",
+              "updatedAt": "2025-02-07T20:04:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86bIKf_",
+          "commit": {
+            "abbreviatedOid": "f1bd914"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-07T19:12:18Z",
+          "updatedAt": "2025-02-07T20:10:10Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "Perhaps:\r\n\r\n```suggestion\r\nServers should treat each time they send a PAKEServerHello extension as a failed\r\nauthentication attempt for the selected identity, until they receive a correct Finished\r\nmessage from the client. Once a correct Finished message is received, the connection\r\nMAY be treated as a successful attempt.\r\n```\r\n\r\nReasoning: it's a little non-obvious that the maximally finicky version of the counter goes down and then up.",
+              "createdAt": "2025-02-07T19:12:18Z",
+              "updatedAt": "2025-02-07T20:10:10Z"
+            },
+            {
+              "originalPosition": 25,
+              "body": "Perhaps:\r\n\r\n```suggestion\r\nimposing a backoff time between attempts, limiting the number of failed\r\nauthentication attempts, or limiting the total number of attempts.\r\n```\r\n\r\nReasoning: we go talk about failed attempts below, but we never actually said why failed attempts matter.",
+              "createdAt": "2025-02-07T20:09:56Z",
+              "updatedAt": "2025-02-07T20:10:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86bIvkR",
+          "commit": {
+            "abbreviatedOid": "f1bd914"
+          },
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-07T20:25:34Z",
+          "updatedAt": "2025-02-07T20:25:49Z",
+          "comments": [
+            {
+              "originalPosition": 48,
+              "body": "I can't comment above cause there is no diff, but we previously say on line 205-206:\r\n\r\n>  If one does not exist, the server simulates a PAKE response as described in {{simulation}}.\r\n\r\nI think we should update that to say \"the server MAY simulate a PAKE response\" to match the directive used here.\r\n",
+              "createdAt": "2025-02-07T20:25:35Z",
+              "updatedAt": "2025-02-07T20:25:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOM83jm86bJLBa",
+          "commit": {
+            "abbreviatedOid": "ba9dce2"
+          },
+          "author": "baumanl",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-07T21:21:09Z",
+          "updatedAt": "2025-02-07T21:21:09Z",
           "comments": []
         }
       ]
