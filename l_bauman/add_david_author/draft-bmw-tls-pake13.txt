@@ -3,10 +3,13 @@
 
 
 Network Working Group                                          L. Bauman
-Internet-Draft                                                  S. Menon
-Intended status: Informational                                C. A. Wood
-Expires: 13 July 2025                                        Apple, Inc.
-                                                          9 January 2025
+Internet-Draft                                               Apple, Inc.
+Intended status: Informational                               D. Benjamin
+Expires: 15 August 2025                                       Google LLC
+                                                                S. Menon
+                                                              C. A. Wood
+                                                             Apple, Inc.
+                                                        11 February 2025
 
 
       A Password Authenticated Key Exchange Extension for TLS 1.3
@@ -45,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 July 2025.
+   This Internet-Draft will expire on 15 August 2025.
 
 Copyright Notice
 
@@ -77,9 +80,11 @@ Table of Contents
      6.2.  Protocol Execution
    7.  Privacy Considerations
    8.  Security Considerations
-     8.1.  SPAKE2+ Security Considerations
+     8.1.  Dictionary attack mitigation
+     8.2.  Protection of client identities
+     8.3.  SPAKE2+ Security Considerations
    9.  IANA Considerations
-     9.1.  Named PAKE registry
+     9.1.  PAKE Scheme registry
    Acknowledgments
    References
      Normative References
@@ -89,11 +94,9 @@ Table of Contents
 1.  Introduction
 
    DISCLAIMER: Much of this text is copied from [FIRST-DRAFT] and is in
-   the process of being updated.
-
-   DISCLAIMER: This is a work-in-progress draft and has not yet seen
-   significant security analysis.  See Section 8 and Section 8.1 for
-   more information.
+   the process of being updated.  This is a work-in-progress draft and
+   has not yet seen significant security analysis.  See Section 8 and
+   Section 8.3 for more information.
 
    In some applications, it is desirable to enable a client and server
    to authenticate to one another using a low-entropy pre-shared value,
@@ -171,10 +174,10 @@ Table of Contents
 
    enum {
        SPAKE2PLUS_V1 (0xXXXX),
-   } NamedPAKE;
+   } PAKEScheme;
 
    struct {
-       NamedPAKE   named_pake;
+       PAKEScheme   pake_scheme;
        opaque      pake_message<1..2^16-1>;
    } PAKEShare;
 
@@ -190,7 +193,7 @@ Table of Contents
    Concretely, these structure fields are defined as follows:
 
    client_shares  A list of PAKEShare values, each one with a distinct
-      NamedPAKE algorithm.
+      PAKEScheme algorithm.
 
    client_identity  The client identity used for the PAKE.  It may be
       empty.
@@ -198,7 +201,7 @@ Table of Contents
    server_identity  The server identity used for the PAKE.  It may be
       empty.
 
-   named_pake  The 2-byte identifier of the PAKE algorithm.
+   pake_scheme  The 2-byte identifier of the PAKE algorithm.
 
    pake_message  The client PAKE message used to initialize the
       protocol.
@@ -206,11 +209,28 @@ Table of Contents
    The client and server identity fields are common to all PAKEShares to
    prevent client enumeration attacks; see Section 8.
 
-   The NamedPAKE field in the PAKEShare allows implementations to
+   The PAKEScheme field in the PAKEShare allows implementations to
    support multiple PAKEs and negotiate which to use in the context of
    the handshake.  For instance, if a client knows a password but not
    which PAKE the server supports it could send corresponding PAKEShares
-   for each PAKE.
+   for each PAKE.  If the client sends multiple PAKEShare values, then
+   they MUST be sorted in monotonically increasing order by the
+   NamedPAKE value.  Moreover, the client MUST NOT send more than one
+   PAKEShare with the same NamedPAKE value.
+
+   Section 9.2 of [TLS13] specifies that a valid ClientHello must
+   include either a pre_shared_key extension or both a
+   signature_algorithms and supported_groups extension.  With the
+   addition of the pake extension specified here, the new requirement is
+   that a valid ClientHello must satisfy at least one of the following
+   options:
+
+   *  includes a pre_shared_key extension
+
+   *  includes both a signature_algorithms and supported_groups
+      extensions
+
+   *  includes a pake extension
 
    If a client sends the pake extension, then it MAY also send the
    key_share and pre_shared_key extensions, to allow the server to
@@ -226,25 +246,26 @@ Table of Contents
 4.2.  Server Behavior
 
    A server that receives a pake extension examines its contents to
-   determine if it is well-formed.  In particular, if there are
-   duplicate PAKEShare values in the PAKEClientHello structure for the
-   same NamedPAKE, the server aborts the handshake with an
+   determine if it is well-formed.  In particular, if the list of
+   PAKEShare values is not sorted in monotonically increasing order by
+   PAKEScheme values, or if there are duplicate PAKEScheme entries in
+   this list, the server aborts the handshake with an
    "illegal_parameter" alert.
 
    If the list of PAKEShare values is well-formed, the server then scans
    the list of PAKEShare values to determine if there is one
-   corresponding to a server supported NamedPAKE.  If the server does
-   not support any of the offered NamedPAKEs in the client PAKEShares
+   corresponding to a server supported PAKEScheme.  If the server does
+   not support any of the offered PAKESchemes in the client PAKEShares
    then the server MUST abort the protocol with an "illegal_parameter"
    alert.
 
-   If the server has a NamedPAKE in common with the client then the
+   If the server has a PAKEScheme in common with the client then the
    server uses the client_identity and server_identity alongside its
    local database of PAKE registration information to determine if the
    request corresponds to a legitimate client registration record.  If
-   one does not exist, the server simulates a PAKE response as described
-   in Section 4.4.  Simulating a response prevents client enumeration
-   attacks on the server's PAKE database; see Section 8.
+   one does not exist, the server MAY simulate a PAKE response as
+   described in Section 4.4.  Simulating a response prevents client
+   enumeration attacks on the server's PAKE database; see Section 8.
 
    If there exists a valid PAKE registration, the server indicates its
    selection by including a pake extension in its ServerHello.  The
@@ -265,8 +286,8 @@ Table of Contents
 
    Use of PAKE authentication is not compatible with standard
    certificate-based authentication of both clients and servers.  If use
-   of a PAKE is negotiated, then servers MUST NOT include a Certificate
-   or CertificateRequest message in the handshake.
+   of a PAKE is negotiated, then servers MUST NOT include a Certificate,
+   CertificateVerify, or CertificateRequest message in the handshake.
 
 4.3.  Key Schedule Modifications
 
@@ -287,15 +308,13 @@ Table of Contents
 
    To simulate a fake PAKE response, the server does the following:
 
-   *  Select a random NamedPAKE supported by the client and server.
+   *  Select a PAKEScheme supported by the client and server, as normal.
 
    *  Include the pake extension in its ServerHello, containing a
-      PAKEShare value with the randomly selected NamedPAKE and
-      corresponding pake_message.  To generate the pake_message for this
-      PAKEShare value, the server should select a value uniformly at
-      random from the set of possible values of the PAKE algorithm
-      shares.  For example, for SPAKE2+, this would be a random point on
-      the elliptic curve group.
+      PAKEShare value with the selected PAKEScheme and corresponding
+      pake_message.  To generate the pake_message for this PAKEShare
+      value, the server selects a value uniformly at random from the set
+      of possible values of the PAKE algorithm shares.
 
    *  Perform the rest of the protocol as normal.
 
@@ -316,7 +335,7 @@ Table of Contents
    describing the use of a particular PAKE protocol with TLS must
    provide the following details:
 
-   *  A NamedPAKE registered value indicating pre-provisioned
+   *  A PAKEScheme registered value indicating pre-provisioned
       parameters;
 
    *  Content of the pake_message field in a ClientHello;
@@ -362,30 +381,32 @@ Table of Contents
    not specified here; see Section 3.2 of [SPAKE2PLUS] for more
    information.
 
-   The NamedPake value for SPAKE2+ fully defines the parameters
+   The PAKEScheme value for SPAKE2+ fully defines the parameters
    associated with the protocol, including the prime-order group G,
    cryptographic hash function Hash, key derivation function KDF, and
-   message authentication code MAC.  Additionally, the NamedPake value
+   message authentication code MAC.  Additionally, the PAKEScheme value
    for SPAKE2+ fully defines the constants for M and N as needed for the
    protocol; see Section 4 of [SPAKE2PLUS].
 
 6.2.  Protocol Execution
 
    The content of one PAKEShare value in the PAKEClientHello structure
-   consists of the NamedPAKE value SPAKE2PLUS_V1 and the value shareP as
-   computed in Section 3.3 of [SPAKE2PLUS].
+   consists of the PAKEScheme value SPAKE2PLUS_V1 and the value shareP
+   as computed in Section 3.3 of [SPAKE2PLUS].
 
    The content of the server PAKEShare value in the PAKEServerHello
-   structure consists of the NamedPAKE value SPAKE2PLUS_V1 and the value
-   shareV || confirmV, i.e., shareV and confirmV concatenated, as
+   structure consists of the PAKEScheme value SPAKE2PLUS_V1 and the
+   value shareV || confirmV, i.e., shareV and confirmV concatenated, as
    computed in Section 3.3 of [SPAKE2PLUS].
 
    Given shareP and shareV, the client and server can then both compute
    K_main, the root secret in the protocol as described in Section 3.4
-   of [SPAKE2PLUS].  The "Context" value for SPAKE2+ is "TLS-
-   SPAKE2PLUS_V1".  The rest of the values needed for the transcript
-   derivation are as configured in Section 6.1, exchanged over the wire,
-   or computed by client and server.
+   of [SPAKE2PLUS].  The "Context" value for SPAKE2+ may be specified by
+   the application to include additional context in the protocol
+   transcript or left empty.  See Section 3 of [SPAKE2PLUS].  The rest
+   of the values needed for the transcript derivation are as configured
+   in Section 6.1, exchanged over the wire, or computed by client and
+   server.
 
    Using K_main, the client and server both compute K_shared which is
    used as input to the TLS 1.3 key schedule.  Specifically, K_shared is
@@ -395,7 +416,7 @@ Table of Contents
                                        0
                                        |
                                        v
-                         PSK ->  HKDF-Extract = Early Secret
+                           0 ->  HKDF-Extract = Early Secret
                                        |
                                        +-----> Derive-Secret(...)
                                        +-----> Derive-Secret(...)
@@ -421,10 +442,14 @@ Table of Contents
                                        +-----> Derive-Secret(...)
                                        +-----> Derive-Secret(...)
 
-   Note that the client and server do not additionally compute or verify
-   the key confirmation messages as described in Section 3.4 of
-   [SPAKE2PLUS].  See Section 8.1 for more information about the safety
-   of this approach.
+   Note that the server does compute and send confirmV as defined in
+   Section 3.4 of [SPAKE2PLUS] since it can do so within the structure
+   of the TLS 1.3 handshake and the client MUST verify it.  If
+   verification of confirmV fails, clients SHOULD abort the handshake
+   with a "decrypt_error" alert.  The client and server do not
+   additionally compute or verify confirmP as described in Section 3.4
+   of [SPAKE2PLUS].  See Section 8.3 for more information about the
+   safety of this approach.
 
 7.  Privacy Considerations
 
@@ -447,6 +472,28 @@ Table of Contents
 
 8.  Security Considerations
 
+8.1.  Dictionary attack mitigation
+
+   Because PAKE security is based on knowledge of a low-entropy secret,
+   an attacker can perform a "dictionary attack" by repeatedly
+   attempting to guess the low-entropy secret.
+
+   Clients and servers SHOULD apply mitigations against dictionary
+   attacks.  Reasonable mitigations include rate-limiting authentication
+   attempts, imposing a backoff time between attempts, limiting the
+   number of failed attempts, or limiting the total number of attempts.
+
+   Clients SHOULD treat each time they receive an invalid
+   PAKEServerHello as a failed authentication attempt for the identity
+   in the previously sent PAKEClientHello.  Servers SHOULD treat each
+   time they send a PAKEServerHello extension as a failed authentication
+   attempt for the selected identity, until they receive a correct
+   Finished message from the client.  Once the server receives a correct
+   Finished message, the authentication attempt MAY be treated as
+   successful.
+
+8.2.  Protection of client identities
+
    Many of the security properties of this protocol will derive from the
    PAKE protocol being used.  Security considerations for PAKE protocols
    are noted in Section 5.
@@ -455,17 +502,15 @@ Table of Contents
    the ClientHello pake extension, the server MAY abort the handshake
    with an "illegal_parameter" alert.  In this case, the server acts as
    an oracle for identities, in which each handshake allows an attacker
-   to learn whether the server recognizes any of the identities in a
-   set.
+   to learn whether the server recognizes a given identity.
 
-   Alternatively, if the server wishes to hide the fact that these
-   client identities are unrecognized, the server MAY simulate the
-   protocol as if an identity was recognized, but then reject the
-   client's Finished message with a "decrypt_error" alert, as if the
-   password was incorrect.  This is similar to the procedure outlined in
-   [RFC5054].  The simulation mechanism is described in Section 4.4.
+   Alternatively, if the server wishes to hide the fact that a client
+   identity is unrecognized, the server MAY simulate the protocol as if
+   an identity was recognized, but the password was incorrect.  This is
+   similar to the procedure outlined in [RFC5054].  The simulation
+   mechanism is described in Section 4.4.
 
-8.1.  SPAKE2+ Security Considerations
+8.3.  SPAKE2+ Security Considerations
 
    Section 6 describes how to integrate SPAKE2+ into TLS using the pake
    extension in this document.  This integration deviates from the
@@ -494,20 +539,20 @@ Table of Contents
    value assigned by IANA, and replace "(this document)" with the RFC
    number assigned to this document. ]]
 
-9.1.  Named PAKE registry
+9.1.  PAKE Scheme registry
 
-   This document requests that IANA create a new registry called "Named
-   PAKE Algorithms" with the following contents:
+   This document requests that IANA create a new registry called "PAKE
+   Schemes" with the following contents:
 
            +========+===============+=================+=======+
-           | Value  | Named PAKE    |    Reference    | Notes |
+           | Value  | PAKEScheme    |    Reference    | Notes |
            +========+===============+=================+=======+
            | 0xTODO | SPAKE2PLUS_V1 | (this document) | N/A   |
            +--------+---------------+-----------------+-------+
 
                                  Table 2
 
-   The SPAKE2PLUS_V1 NamedPAKE variant has the following parameters
+   The SPAKE2PLUS_V1 PAKEScheme variant has the following parameters
    associated with it:
 
    *  G: P-256
@@ -603,6 +648,11 @@ Authors' Addresses
    Laura Bauman
    Apple, Inc.
    Email: l_bauman@apple.com
+
+
+   David Benjamin
+   Google LLC
+   Email: davidben@google.com
 
 
    Samir Menon

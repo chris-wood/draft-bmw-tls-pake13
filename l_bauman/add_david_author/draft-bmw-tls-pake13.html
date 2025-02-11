@@ -6,6 +6,7 @@
 <meta content="initial-scale=1.0" name="viewport">
 <title>A Password Authenticated Key Exchange Extension for TLS 1.3</title>
 <meta content="Laura Bauman" name="author">
+<meta content="David Benjamin" name="author">
 <meta content="Samir Menon" name="author">
 <meta content="Christopher A. Wood" name="author">
 <meta content="
@@ -14,11 +15,11 @@ for usage with low-entropy keys, such as passwords entered by users.
 This document describes an extension that enables the use of
 password-authenticated key exchange protocols with TLS 1.3. 
     " name="description">
-<meta content="xml2rfc 3.25.0" name="generator">
+<meta content="xml2rfc 3.26.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-bmw-tls-pake13-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.25.0
+  xml2rfc 3.26.0
     Python 3.12.8
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
@@ -1049,11 +1050,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">TLS 1.3 PAKE</td>
-<td class="right">January 2025</td>
+<td class="right">February 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Bauman, et al.</td>
-<td class="center">Expires 13 July 2025</td>
+<td class="center">Expires 15 August 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1066,17 +1067,21 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-bmw-tls-pake13-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-01-09" class="published">9 January 2025</time>
+<time datetime="2025-02-11" class="published">11 February 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-07-13">13 July 2025</time></dd>
+<dd class="expires"><time datetime="2025-08-15">15 August 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
       <div class="author-name">L. Bauman</div>
 <div class="org">Apple, Inc.</div>
+</div>
+<div class="author">
+      <div class="author-name">D. Benjamin</div>
+<div class="org">Google LLC</div>
 </div>
 <div class="author">
       <div class="author-name">S. Menon</div>
@@ -1127,7 +1132,7 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 13 July 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 15 August 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1203,7 +1208,13 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
             <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-spake2-security-considerati" class="internal xref">SPAKE2+ Security Considerations</a></p>
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-dictionary-attack-mitigatio" class="internal xref">Dictionary attack mitigation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-protection-of-client-identi" class="internal xref">Protection of client identities</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-spake2-security-considerati" class="internal xref">SPAKE2+ Security Considerations</a></p>
 </li>
             </ul>
 </li>
@@ -1211,7 +1222,7 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
             <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
-                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-named-pake-registry" class="internal xref">Named PAKE registry</a></p>
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-pake-scheme-registry" class="internal xref">PAKE Scheme registry</a></p>
 </li>
             </ul>
 </li>
@@ -1242,31 +1253,30 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">DISCLAIMER: Much of this text is copied from <span>[<a href="#FIRST-DRAFT" class="cite xref">FIRST-DRAFT</a>]</span>
-and is in the process of being updated.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">DISCLAIMER: This is a work-in-progress draft and has not yet
-seen significant security analysis. See <a href="#security" class="auto internal xref">Section 8</a> and <a href="#spake2plus-sec" class="auto internal xref">Section 8.1</a>
-for more information.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">In some applications, it is desirable to enable a client and server
+and is in the process of being updated. This is a work-in-progress draft and has
+not yet seen significant security analysis. See <a href="#security" class="auto internal xref">Section 8</a> and <a href="#spake2plus-sec" class="auto internal xref">Section 8.3</a>
+for more information.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">In some applications, it is desirable to enable a client and server
 to authenticate to one another using a low-entropy pre-shared value,
-such as a user-entered password.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">In prior versions of TLS, this functionality has been provided by
+such as a user-entered password.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">In prior versions of TLS, this functionality has been provided by
 the integration of the Secure Remote Password PAKE protocol (SRP)
 <span>[<a href="#RFC5054" class="cite xref">RFC5054</a>]</span>. The specific SRP integration described in RFC 5054
 does not immediately extend to TLS 1.3 because it relies on the
 Client Key Exchange and Server Key Exchange messages, which no
-longer exist in 1.3.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">TLS 1.3 itself provides a mechanism for authentication with
+longer exist in 1.3.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">TLS 1.3 itself provides a mechanism for authentication with
 pre-shared keys (PSKs). However, PSKs used with this protocol need
 to be "full-entropy", because the binder values used for
 authentication can be used to mount a dictionary attack on the PSK.
 So while the TLS 1.3 PSK mechanism is suitable for the session
 resumption cases for which it is specified, it cannot be used when
-the client and server share only a low-entropy secret.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">Enabling TLS to address this use case effectively requires the TLS
+the client and server share only a low-entropy secret.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">Enabling TLS to address this use case effectively requires the TLS
 handshake to execute a password-authenticated key establishment
 (PAKE) protocol. This document describes a TLS extension <code>pake</code>
-that can carry data necessary to execute a PAKE.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">This extension is generic, in that it can be used to carry key
+that can carry data necessary to execute a PAKE.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">This extension is generic, in that it can be used to carry key
 exchange information for multiple different PAKEs. We assume that
 prior to the TLS handshake the client and server will both have
 knowledge of the password or PAKE-specific values derived from the
@@ -1274,7 +1284,7 @@ password (e.g. augmented PAKEs only require one party to know the
 actual password). The choice of PAKE and any required parameters will
 be explicitly specified using IANA assigned values. As a first
 case, this document defines a concrete protocol for executing the
-SPAKE2+ PAKE protocol <span>[<a href="#RFC9383" class="cite xref">RFC9383</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
+SPAKE2+ PAKE protocol <span>[<a href="#RFC9383" class="cite xref">RFC9383</a>]</span>.<a href="#section-1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="terminology">
@@ -1333,10 +1343,10 @@ structure:<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <pre>
 enum {
     SPAKE2PLUS_V1 (0xXXXX),
-} NamedPAKE;
+} PAKEScheme;
 
 struct {
-    NamedPAKE   named_pake;
+    PAKEScheme   pake_scheme;
     opaque      pake_message&lt;1..2^16-1&gt;;
 } PAKEShare;
 
@@ -1354,7 +1364,7 @@ Concretely, these structure fields are defined as follows:<a href="#section-4.1-
 <span class="break"></span><dl class="dlParallel" id="section-4.1-6">
           <dt id="section-4.1-6.1">client_shares</dt>
           <dd style="margin-left: 1.5em" id="section-4.1-6.2">
-            <p id="section-4.1-6.2.1">A list of PAKEShare values, each one with a distinct NamedPAKE algorithm.<a href="#section-4.1-6.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-6.2.1">A list of PAKEShare values, each one with a distinct PAKEScheme algorithm.<a href="#section-4.1-6.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.1-6.3">client_identity</dt>
@@ -1367,7 +1377,7 @@ Concretely, these structure fields are defined as follows:<a href="#section-4.1-
             <p id="section-4.1-6.6.1">The server identity used for the PAKE. It may be empty.<a href="#section-4.1-6.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-4.1-6.7">named_pake</dt>
+<dt id="section-4.1-6.7">pake_scheme</dt>
           <dd style="margin-left: 1.5em" id="section-4.1-6.8">
             <p id="section-4.1-6.8.1">The 2-byte identifier of the PAKE algorithm.<a href="#section-4.1-6.8.1" class="pilcrow">¶</a></p>
 </dd>
@@ -1380,20 +1390,39 @@ Concretely, these structure fields are defined as follows:<a href="#section-4.1-
 </dl>
 <p id="section-4.1-7">The client and server identity fields are common to all PAKEShares to prevent
 client enumeration attacks; see <a href="#security" class="auto internal xref">Section 8</a>.<a href="#section-4.1-7" class="pilcrow">¶</a></p>
-<p id="section-4.1-8">The <code>NamedPAKE</code> field in the <code>PAKEShare</code> allows implementations to
+<p id="section-4.1-8">The <code>PAKEScheme</code> field in the <code>PAKEShare</code> allows implementations to
 support multiple PAKEs and negotiate which to use in the context of
 the handshake. For instance, if a client knows a password but not which
 PAKE the server supports it could send corresponding PAKEShares for each
-PAKE.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
-<p id="section-4.1-9">If a client sends the <code>pake</code> extension, then it <span class="bcp14">MAY</span> also send the
+PAKE. If the client sends multiple PAKEShare values, then they <span class="bcp14">MUST</span>
+be sorted in monotonically increasing order by the NamedPAKE value. Moreover,
+the client <span class="bcp14">MUST NOT</span> send more than one PAKEShare with the same NamedPAKE value.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1-9"><span><a href="https://rfc-editor.org/rfc/rfc8446#section-9.2" class="relref">Section 9.2</a> of [<a href="#TLS13" class="cite xref">TLS13</a>]</span> specifies that a valid ClientHello
+must include either a <code>pre_shared_key</code> extension or both
+a <code>signature_algorithms</code> and <code>supported_groups</code> extension. With the
+addition of the <code>pake</code> extension specified here, the new requirement
+is that a valid ClientHello must satisfy at least one of the
+following options:<a href="#section-4.1-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1-10.1">
+            <p id="section-4.1-10.1.1">includes a <code>pre_shared_key</code> extension<a href="#section-4.1-10.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.1-10.2">
+            <p id="section-4.1-10.2.1">includes both a <code>signature_algorithms</code> and <code>supported_groups</code> extensions<a href="#section-4.1-10.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.1-10.3">
+            <p id="section-4.1-10.3.1">includes a <code>pake</code> extension<a href="#section-4.1-10.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.1-11">If a client sends the <code>pake</code> extension, then it <span class="bcp14">MAY</span> also send the
 <code>key_share</code> and <code>pre_shared_key</code> extensions, to allow the server to
 choose an authentication mode. Unlike PSK-based authentication,
 however, authentication with PAKE cannot be combined with the
 normal TLS key exchange mechanism. Forward secrecy is provided by
-the PAKE itself.<a href="#section-4.1-9" class="pilcrow">¶</a></p>
-<p id="section-4.1-10">The server identity value provided in the PAKEClientHello structure
+the PAKE itself.<a href="#section-4.1-11" class="pilcrow">¶</a></p>
+<p id="section-4.1-12">The server identity value provided in the PAKEClientHello structure
 are disjoint from that which the client may provide in the
-ServerNameIndication (SNI) field.<a href="#section-4.1-10" class="pilcrow">¶</a></p>
+ServerNameIndication (SNI) field.<a href="#section-4.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="server-behavior">
@@ -1402,19 +1431,20 @@ ServerNameIndication (SNI) field.<a href="#section-4.1-10" class="pilcrow">¶</a
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-server-behavior" class="section-name selfRef">Server Behavior</a>
         </h3>
 <p id="section-4.2-1">A server that receives a <code>pake</code> extension examines its contents to determine
-if it is well-formed. In particular, if there are duplicate PAKEShare values
-in the PAKEClientHello structure for the same NamedPAKE, the server aborts the
-handshake with an "illegal_parameter" alert.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+if it is well-formed. In particular, if the list of PAKEShare values is not
+sorted in monotonically increasing order by PAKEScheme values, or if there are
+duplicate PAKEScheme entries in this list, the server aborts the handshake with
+an "illegal_parameter" alert.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.2-2">If the list of PAKEShare values is well-formed, the server then scans the list
 of PAKEShare values to determine if there is one corresponding to a server
-supported NamedPAKE. If the server does not support any of the offered NamedPAKEs
+supported PAKEScheme. If the server does not support any of the offered PAKESchemes
 in the client PAKEShares then the server <span class="bcp14">MUST</span> abort the protocol
 with an "illegal_parameter" alert.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
-<p id="section-4.2-3">If the server has a NamedPAKE in common with the client then the server uses
+<p id="section-4.2-3">If the server has a PAKEScheme in common with the client then the server uses
 the client_identity and server_identity alongside its local database of PAKE
 registration information to determine if the request corresponds to a legitimate
 client registration record. If one does not
-exist, the server simulates a PAKE response as described in <a href="#simulation" class="auto internal xref">Section 4.4</a>.
+exist, the server <span class="bcp14">MAY</span> simulate a PAKE response as described in <a href="#simulation" class="auto internal xref">Section 4.4</a>.
 Simulating a response prevents client enumeration attacks on the server's
 PAKE database; see <a href="#security" class="auto internal xref">Section 8</a>.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
 <p id="section-4.2-4">If there exists a valid PAKE registration, the server indicates its selection
@@ -1435,8 +1465,8 @@ in response to the client's PAKE message.<a href="#section-4.2-6" class="pilcrow
 extension of type <code>key_share</code>, <code>pre_shared_key</code>, or <code>early_data</code>.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
 <p id="section-4.2-8">Use of PAKE authentication is not compatible with standard
 certificate-based authentication of both clients and servers. If use
-of a PAKE is negotiated, then servers <span class="bcp14">MUST NOT</span> include a Certificate or
-CertificateRequest message in the handshake.<a href="#section-4.2-8" class="pilcrow">¶</a></p>
+of a PAKE is negotiated, then servers <span class="bcp14">MUST NOT</span> include a Certificate,
+CertificateVerify, or CertificateRequest message in the handshake.<a href="#section-4.2-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="key-schedule-modifications">
@@ -1465,14 +1495,13 @@ otherwise be sending data to an unauthenticated client.<a href="#section-4.3-2" 
 <p id="section-4.4-1">To simulate a fake PAKE response, the server does the following:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-2.1">
-            <p id="section-4.4-2.1.1">Select a random NamedPAKE supported by the client and server.<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-2.1.1">Select a PAKEScheme supported by the client and server, as normal.<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.4-2.2">
             <p id="section-4.4-2.2.1">Include the <code>pake</code> extension in its ServerHello, containing a PAKEShare value with
-the randomly selected NamedPAKE and corresponding <code>pake_message</code>. To generate the <code>pake_message</code>
-for this <code>PAKEShare</code> value, the server should select a value uniformly at random from
-the set of possible values of the PAKE algorithm shares. For example, for SPAKE2+,
-this would be a random point on the elliptic curve group.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
+the selected PAKEScheme and corresponding <code>pake_message</code>. To generate the <code>pake_message</code>
+for this <code>PAKEShare</code> value, the server selects a value uniformly at random from
+the set of possible values of the PAKE algorithm shares.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.4-2.3">
             <p id="section-4.4-2.3.1">Perform the rest of the protocol as normal.<a href="#section-4.4-2.3.1" class="pilcrow">¶</a></p>
@@ -1500,7 +1529,7 @@ specification describing the use of a particular PAKE protocol with
 TLS must provide the following details:<a href="#section-5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5-2.1">
-          <p id="section-5-2.1.1">A <code>NamedPAKE</code> registered value indicating pre-provisioned parameters;<a href="#section-5-2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-5-2.1.1">A <code>PAKEScheme</code> registered value indicating pre-provisioned parameters;<a href="#section-5-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-5-2.2">
           <p id="section-5-2.2.1">Content of the <code>pake_message</code> field in a ClientHello;<a href="#section-5-2.2.1" class="pilcrow">¶</a></p>
@@ -1555,10 +1584,10 @@ and password registration values (w0 and L according to <span>[<a href="#SPAKE2P
 use this list when completing the SPAKE2+ protocol. The values for the password
 verifiers and registration records (w0, w1, and L) are not specified here; see
 <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.2" class="relref">Section 3.2</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span> for more information.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2">The NamedPake value for SPAKE2+ fully defines the parameters associated with
+<p id="section-6.1-2">The PAKEScheme value for SPAKE2+ fully defines the parameters associated with
 the protocol, including the prime-order group <code>G</code>, cryptographic hash function <code>Hash</code>,
 key derivation function <code>KDF</code>, and message authentication code <code>MAC</code>. Additionally,
-the NamedPake value for SPAKE2+ fully defines the constants for M and N
+the PAKEScheme value for SPAKE2+ fully defines the constants for M and N
 as needed for the protocol; see <span><a href="https://rfc-editor.org/rfc/rfc9383#section-4" class="relref">Section 4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1568,15 +1597,16 @@ as needed for the protocol; see <span><a href="https://rfc-editor.org/rfc/rfc938
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-protocol-execution" class="section-name selfRef">Protocol Execution</a>
         </h3>
 <p id="section-6.2-1">The content of one PAKEShare value in the PAKEClientHello structure consists
-of the NamedPAKE value <code>SPAKE2PLUS_V1</code> and the value <code>shareP</code> as computed in
+of the PAKEScheme value <code>SPAKE2PLUS_V1</code> and the value <code>shareP</code> as computed in
 <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.3" class="relref">Section 3.3</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">The content of the server PAKEShare value in the PAKEServerHello structure
-consists of the NamedPAKE value <code>SPAKE2PLUS_V1</code> and the value <code>shareV || confirmV</code>,
+consists of the PAKEScheme value <code>SPAKE2PLUS_V1</code> and the value <code>shareV || confirmV</code>,
 i.e., <code>shareV</code> and <code>confirmV</code> concatenated, as computed in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.3" class="relref">Section 3.3</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 <p id="section-6.2-3">Given <code>shareP</code> and <code>shareV</code>, the client and server can then both compute
 K_main, the root secret in the protocol as described in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.
-The "Context" value for SPAKE2+ is "TLS-SPAKE2PLUS_V1". The rest of the values
-needed for the transcript derivation are as configured in <a href="#spake2plus-setup" class="auto internal xref">Section 6.1</a>,
+The "Context" value for SPAKE2+ may be specified by the application to include additional
+context in the protocol transcript or left empty. See <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3" class="relref">Section 3</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>. The rest of
+the values needed for the transcript derivation are as configured in <a href="#spake2plus-setup" class="auto internal xref">Section 6.1</a>,
 exchanged over the wire, or computed by client and server.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <p id="section-6.2-4">Using <code>K_main</code>, the client and server both compute <code>K_shared</code> which is used as
 input to the TLS 1.3 key schedule. Specifically, <code>K_shared</code> is used
@@ -1586,7 +1616,7 @@ as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://
                                     0
                                     |
                                     v
-                      PSK -&gt;  HKDF-Extract = Early Secret
+                        0 -&gt;  HKDF-Extract = Early Secret
                                     |
                                     +-----&gt; Derive-Secret(...)
                                     +-----&gt; Derive-Secret(...)
@@ -1613,9 +1643,12 @@ as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://
                                     +-----&gt; Derive-Secret(...)
 </pre><a href="#section-6.2-5" class="pilcrow">¶</a>
 </div>
-<p id="section-6.2-6">Note that the client and server do not additionally compute or verify the key
-confirmation messages as described in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.
-See <a href="#spake2plus-sec" class="auto internal xref">Section 8.1</a> for more information about the safety of this approach.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
+<p id="section-6.2-6">Note that the server does compute and send confirmV as defined in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>
+since it can do so within the structure of the TLS 1.3 handshake and the client <span class="bcp14">MUST</span> verify it.
+If verification of confirmV fails, clients <span class="bcp14">SHOULD</span> abort the handshake with a "decrypt_error" alert.
+The client and server do not additionally compute or verify confirmP
+as described in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.
+See <a href="#spake2plus-sec" class="auto internal xref">Section 8.3</a> for more information about the safety of this approach.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1644,32 +1677,59 @@ client enumeration may be a concern.<a href="#section-7-2" class="pilcrow">¶</a
       <h2 id="name-security-considerations">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-8-1">Many of the security properties of this protocol will derive from
+<div id="dictionary-attack-mitigation">
+<section id="section-8.1">
+        <h3 id="name-dictionary-attack-mitigatio">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-dictionary-attack-mitigatio" class="section-name selfRef">Dictionary attack mitigation</a>
+        </h3>
+<p id="section-8.1-1">Because PAKE security is based on knowledge of a low-entropy secret,
+an attacker can perform a "dictionary attack" by repeatedly attempting to
+guess the low-entropy secret.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1-2">Clients and servers <span class="bcp14">SHOULD</span> apply mitigations against dictionary attacks.
+Reasonable mitigations include rate-limiting authentication attempts,
+imposing a backoff time between attempts, limiting the
+number of failed attempts, or limiting the total number
+of attempts.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.1-3">Clients <span class="bcp14">SHOULD</span> treat each time they receive an invalid PAKEServerHello
+as a failed authentication attempt for the identity in the previously sent PAKEClientHello.
+Servers <span class="bcp14">SHOULD</span> treat each time they send a PAKEServerHello extension as a failed
+authentication attempt for the selected identity, until they receive a correct Finished
+message from the client. Once the server receives a correct Finished message,
+the authentication attempt <span class="bcp14">MAY</span> be treated as successful.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protection-of-client-identities">
+<section id="section-8.2">
+        <h3 id="name-protection-of-client-identi">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-protection-of-client-identi" class="section-name selfRef">Protection of client identities</a>
+        </h3>
+<p id="section-8.2-1">Many of the security properties of this protocol will derive from
 the PAKE protocol being used. Security considerations for PAKE
-protocols are noted in <a href="#compatible-pake-protocols" class="auto internal xref">Section 5</a>.<a href="#section-8-1" class="pilcrow">¶</a></p>
-<p id="section-8-2">If a server doesn't recognize the identity supplied by the
+protocols are noted in <a href="#compatible-pake-protocols" class="auto internal xref">Section 5</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-2">If a server doesn't recognize the identity supplied by the
 client in the ClientHello <code>pake</code> extension, the server <span class="bcp14">MAY</span> abort the handshake with an
 "illegal_parameter" alert. In this case, the server acts as an oracle
 for identities, in which each handshake allows an attacker
-to learn whether the server recognizes any of the identities in a set.<a href="#section-8-2" class="pilcrow">¶</a></p>
-<p id="section-8-3">Alternatively, if the server wishes to hide the fact that these client
-identities are unrecognized, the server <span class="bcp14">MAY</span> simulate the protocol as
-if an identity was recognized, but then reject the client's
-Finished message with a "decrypt_error" alert, as if the password was incorrect.
+to learn whether the server recognizes a given identity.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
+<p id="section-8.2-3">Alternatively, if the server wishes to hide the fact that a client
+identity is unrecognized, the server <span class="bcp14">MAY</span> simulate the protocol as
+if an identity was recognized, but the password was incorrect.
 This is similar to the procedure outlined in <span>[<a href="#RFC5054" class="cite xref">RFC5054</a>]</span>.
-The simulation mechanism is described in <a href="#simulation" class="auto internal xref">Section 4.4</a>.<a href="#section-8-3" class="pilcrow">¶</a></p>
+The simulation mechanism is described in <a href="#simulation" class="auto internal xref">Section 4.4</a>.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
 <div id="spake2plus-sec">
-<section id="section-8.1">
+<section id="section-8.3">
         <h3 id="name-spake2-security-considerati">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-spake2-security-considerati" class="section-name selfRef">SPAKE2+ Security Considerations</a>
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-spake2-security-considerati" class="section-name selfRef">SPAKE2+ Security Considerations</a>
         </h3>
-<p id="section-8.1-1"><a href="#spake2plus" class="auto internal xref">Section 6</a> describes how to integrate SPAKE2+ into TLS using the <code>pake</code>
+<p id="section-8.3-1"><a href="#spake2plus" class="auto internal xref">Section 6</a> describes how to integrate SPAKE2+ into TLS using the <code>pake</code>
 extension in this document. This integration deviates from the SPAKE2+
 protocol in <span>[<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span> in one important way: the explicit key confirmation
 checks required in <span>[<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span> are replaced with the TLS Finished messages.
 This is because the TLS Finished messages compute a MAC over the TLS transcript,
-which includes both the <code>shareP</code> and <code>shareV</code> values exchanged for SPAKE2+.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">[[OPEN ISSUE: this requires formal analysis to confirm.]]<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+which includes both the <code>shareP</code> and <code>shareV</code> values exchanged for SPAKE2+.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">[[OPEN ISSUE: this requires formal analysis to confirm.]]<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1703,19 +1763,19 @@ ExtensionType Registry with the following contents:<a href="#section-9-1" class=
 <p id="section-9-3">[[ RFC EDITOR: Please replace "TODO" in the above table with the
 value assigned by IANA, and replace "(this document)" with the
 RFC number assigned to this document. ]]<a href="#section-9-3" class="pilcrow">¶</a></p>
-<div id="named-pake-registry">
+<div id="pake-scheme-registry">
 <section id="section-9.1">
-        <h3 id="name-named-pake-registry">
-<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-named-pake-registry" class="section-name selfRef">Named PAKE registry</a>
+        <h3 id="name-pake-scheme-registry">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-pake-scheme-registry" class="section-name selfRef">PAKE Scheme registry</a>
         </h3>
 <p id="section-9.1-1">This document requests that IANA create a new registry called
-"Named PAKE Algorithms" with the following contents:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+"PAKE Schemes" with the following contents:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-2">
           <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
-              <th class="text-left" rowspan="1" colspan="1">Named PAKE</th>
+              <th class="text-left" rowspan="1" colspan="1">PAKEScheme</th>
               <th class="text-center" rowspan="1" colspan="1">Reference</th>
               <th class="text-left" rowspan="1" colspan="1">Notes</th>
             </tr>
@@ -1729,7 +1789,7 @@ RFC number assigned to this document. ]]<a href="#section-9-3" class="pilcrow">�
             </tr>
           </tbody>
         </table>
-<p id="section-9.1-3">The SPAKE2PLUS_V1 NamedPAKE variant has the following parameters associated with it:<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.1-3">The SPAKE2PLUS_V1 PAKEScheme variant has the following parameters associated with it:<a href="#section-9.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-9.1-4.1">
             <p id="section-9.1-4.1.1">G: P-256<a href="#section-9.1-4.1.1" class="pilcrow">¶</a></p>
@@ -1849,6 +1909,14 @@ document.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <div class="email">
 <span>Email:</span>
 <a href="mailto:l_bauman@apple.com" class="email">l_bauman@apple.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">David Benjamin</span></div>
+<div dir="auto" class="left"><span class="org">Google LLC</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:davidben@google.com" class="email">davidben@google.com</a>
 </div>
 </address>
 <address class="vcard">
