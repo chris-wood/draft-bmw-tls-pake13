@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-11T00:16:40.567838+00:00",
+  "timestamp": "2025-02-13T00:16:48.674692+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -1193,6 +1193,48 @@
           "body": "",
           "createdAt": "2025-02-07T21:21:09Z",
           "updatedAt": "2025-02-07T21:21:09Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "id": "PR_kwDOM83jm86K150H",
+      "title": "add david benjamin as author on draft before getting v2",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/24",
+      "state": "MERGED",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-02-11T17:58:47Z",
+      "updatedAt": "2025-02-11T18:02:53Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "c307f0d0710d116e6088befbe54d390567da4a49",
+      "headRepository": "chris-wood/draft-bmw-tls-pake13",
+      "headRefName": "l_bauman/add_david_author",
+      "headRefOid": "6e44a0ecde7b6a533f48f2432a56c4096dcdafb0",
+      "closedAt": "2025-02-11T18:02:53Z",
+      "mergedAt": "2025-02-11T18:02:53Z",
+      "mergedBy": "baumanl",
+      "mergeCommit": {
+        "oid": "2ce5e52c586194b77e08d43e98cb466681f665a6"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOM83jm86biw8P",
+          "commit": {
+            "abbreviatedOid": "6e44a0e"
+          },
+          "author": "menonsamir",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-11T18:02:32Z",
+          "updatedAt": "2025-02-11T18:02:32Z",
           "comments": []
         }
       ]
