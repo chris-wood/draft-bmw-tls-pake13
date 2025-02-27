@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-25T00:17:08.292851+00:00",
+  "timestamp": "2025-02-27T00:17:08.894684+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -570,6 +570,46 @@
       "updatedAt": "2025-02-07T20:34:23Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 25,
+      "id": "I_kwDOM83jm86rlUO3",
+      "title": "Allow certificates with PAKE negotiation",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/25",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The draft currently prohibits certificate-based authentication when PAKEs are negotiated, primarily to align with RFC8446 semantics. However, multiple people have suggested this is unnecessarily restrictive, and does in fact rule out some important use cases. One such use case is where a client wishes to authenticate with a certificate as well as use the PAKE to authenticate the server.",
+      "createdAt": "2025-02-25T15:01:07Z",
+      "updatedAt": "2025-02-25T15:01:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 26,
+      "id": "I_kwDOM83jm86rlVbd",
+      "title": "Make future PAKE integration constraints more clear",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/26",
+      "state": "OPEN",
+      "author": "chris-wood",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Future PAKESchemes may require more round trips than what is required for the SPAKE2+ scheme. We should make this clear in the document.",
+      "createdAt": "2025-02-25T15:02:51Z",
+      "updatedAt": "2025-02-25T15:08:05Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "chris-wood",
+          "authorAssociation": "OWNER",
+          "body": "We should also state the requirements for each PAKEScheme. For example, they MUST provide the same security properties as the NamedGroup-based key exchange, such as forward secrecy.",
+          "createdAt": "2025-02-25T15:08:03Z",
+          "updatedAt": "2025-02-25T15:08:03Z"
+        }
+      ]
     }
   ],
   "pulls": [
