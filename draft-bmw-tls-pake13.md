@@ -28,7 +28,18 @@ author:
    name: Christopher A. Wood
    organization: Apple, Inc.
    email: caw@heapingbits.net
-
+ - ins: W. Guo
+   name: Wei Guo
+   organization: Huawei Technologies
+   email: guowei90@huawei.com  
+ - ins: L. Xia
+   name: Liang Xia
+   organization: Huawei Technologies
+   email: Frank.Xialiang@huawei.com
+ - ins: J. Li
+   name: Ji Li
+   organization: Huawei Technologies
+   email: liji100@huawei.com    
 
 --- abstract
 
