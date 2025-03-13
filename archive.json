@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-11T00:17:44.503077+00:00",
+  "timestamp": "2025-03-13T00:18:00.168339+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -1278,6 +1278,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 27,
+      "id": "PR_kwDOM83jm86OE32r",
+      "title": "Update draft-bmw-tls-pake13.md",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/pull/27",
+      "state": "OPEN",
+      "author": "FrankXL",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Add Huawei co-authors info",
+      "createdAt": "2025-03-11T02:04:42Z",
+      "updatedAt": "2025-03-11T02:04:43Z",
+      "baseRepository": "chris-wood/draft-bmw-tls-pake13",
+      "baseRefName": "main",
+      "baseRefOid": "2ce5e52c586194b77e08d43e98cb466681f665a6",
+      "headRepository": "FrankXL/draft-bmw-tls-pake13",
+      "headRefName": "patch-1",
+      "headRefOid": "90ac20884439e2b5fa352bf3c10094050cb08f23",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
