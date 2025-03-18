@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-16T00:19:27.086399+00:00",
+  "timestamp": "2025-03-18T00:17:45.058085+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -583,9 +583,17 @@
       "labels": [],
       "body": "The draft currently prohibits certificate-based authentication when PAKEs are negotiated, primarily to align with RFC8446 semantics. However, multiple people have suggested this is unnecessarily restrictive, and does in fact rule out some important use cases. One such use case is where a client wishes to authenticate with a certificate as well as use the PAKE to authenticate the server.",
       "createdAt": "2025-02-25T15:01:07Z",
-      "updatedAt": "2025-02-25T15:01:07Z",
+      "updatedAt": "2025-03-16T02:30:06Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ekr",
+          "authorAssociation": "NONE",
+          "body": "If you do decide to add this, it would be useful to lay out the security implications of both the with-Certificate and without-Certificate versions in the Security Considerations.",
+          "createdAt": "2025-03-16T02:30:05Z",
+          "updatedAt": "2025-03-16T02:30:05Z"
+        }
+      ]
     },
     {
       "number": 26,
