@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-18T00:17:45.058085+00:00",
+  "timestamp": "2025-03-20T00:17:38.768620+00:00",
   "repo": "chris-wood/draft-bmw-tls-pake13",
   "labels": [
     {
@@ -618,6 +618,22 @@
           "updatedAt": "2025-02-25T15:08:03Z"
         }
       ]
+    },
+    {
+      "number": 28,
+      "id": "I_kwDOM83jm86usRN-",
+      "title": "Integrate PAKE Key Exchange with TLS Key Exchange",
+      "url": "https://github.com/chris-wood/draft-bmw-tls-pake13/issues/28",
+      "state": "OPEN",
+      "author": "baumanl",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From suggestion by @ekr on mailing list\n\nIntegrating with the standard TLS Key Exchange with a hybrid (or PQ) key exchange will help provide some quantum resistance even without a PQ PAKE.\n\nInstead of inputting the only the PAKE derived shared secret into the (EC)DHE slot, it can be concatenated with the concatenated_shared_secret/(EC)DHE secret (the regular TLS key exchange secret).",
+      "createdAt": "2025-03-19T08:12:44Z",
+      "updatedAt": "2025-03-19T08:13:55Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
