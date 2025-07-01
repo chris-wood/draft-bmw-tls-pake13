@@ -15,22 +15,22 @@ for usage with low-entropy keys, such as passwords entered by users.
 This document describes an extension that enables the use of
 password-authenticated key exchange protocols with TLS 1.3. 
     " name="description">
-<meta content="xml2rfc 3.26.0" name="generator">
+<meta content="xml2rfc 3.29.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-bmw-tls-pake13-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.26.0
-    Python 3.12.8
+  xml2rfc 3.29.0
+    Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
-    Jinja2 3.1.5
-    lxml 5.3.0
-    platformdirs 4.3.6
+    Jinja2 3.1.6
+    lxml 5.3.1
+    platformdirs 4.3.8
     pycountry 24.6.1
     PyYAML 6.0.2
-    requests 2.32.3
-    setuptools 70.3.0
+    requests 2.32.4
+    setuptools 80.9.0
     wcwidth 0.2.13
 -->
 <link href="draft-bmw-tls-pake13.xml" rel="alternate" type="application/rfc+xml">
@@ -441,7 +441,7 @@ dl {
     margin-bottom: 0;
   }
 }
-dl > dt {
+dl:not(.dlNewline) > dt {
   float: left;
   margin-right: 2ch;
   min-width: 8ch;
@@ -1050,11 +1050,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">TLS 1.3 PAKE</td>
-<td class="right">February 2025</td>
+<td class="right">July 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Bauman, et al.</td>
-<td class="center">Expires 15 August 2025</td>
+<td class="center">Expires 2 January 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1067,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-bmw-tls-pake13-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-02-11" class="published">11 February 2025</time>
+<time datetime="2025-07-01" class="published">1 July 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-08-15">15 August 2025</time></dd>
+<dd class="expires"><time datetime="2026-01-02">2 January 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1132,7 +1132,7 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 15 August 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 2 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1214,7 +1214,10 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
                 <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-protection-of-client-identi" class="internal xref">Protection of client identities</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-spake2-security-considerati" class="internal xref">SPAKE2+ Security Considerations</a></p>
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-ramifications-of-low-entrop" class="internal xref">Ramifications of low entropy secret compromise</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-spake2-security-considerati" class="internal xref">SPAKE2+ Security Considerations</a></p>
 </li>
             </ul>
 </li>
@@ -1254,7 +1257,7 @@ password-authenticated key exchange protocols with TLS 1.3.<a href="#section-abs
       </h2>
 <p id="section-1-1">DISCLAIMER: Much of this text is copied from <span>[<a href="#FIRST-DRAFT" class="cite xref">FIRST-DRAFT</a>]</span>
 and is in the process of being updated. This is a work-in-progress draft and has
-not yet seen significant security analysis. See <a href="#security" class="auto internal xref">Section 8</a> and <a href="#spake2plus-sec" class="auto internal xref">Section 8.3</a>
+not yet seen significant security analysis. See <a href="#security" class="auto internal xref">Section 8</a> and <a href="#spake2plus-sec" class="auto internal xref">Section 8.4</a>
 for more information.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">In some applications, it is desirable to enable a client and server
 to authenticate to one another using a low-entropy pre-shared value,
@@ -1408,21 +1411,28 @@ following options:<a href="#section-4.1-9" class="pilcrow">¶</a></p>
             <p id="section-4.1-10.1.1">includes a <code>pre_shared_key</code> extension<a href="#section-4.1-10.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-10.2">
-            <p id="section-4.1-10.2.1">includes both a <code>signature_algorithms</code> and <code>supported_groups</code> extensions<a href="#section-4.1-10.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-10.2.1">includes <code>signature_algorithms</code>, <code>supported_groups</code>, and <code>key_share</code>  extensions<a href="#section-4.1-10.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-10.3">
-            <p id="section-4.1-10.3.1">includes a <code>pake</code> extension<a href="#section-4.1-10.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-10.3.1">includes <code>pake</code>, <code>supported_groups</code>, and <code>key_share</code> extensions<a href="#section-4.1-10.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.1-11">If a client sends the <code>pake</code> extension, then it <span class="bcp14">MAY</span> also send the
-<code>key_share</code> and <code>pre_shared_key</code> extensions, to allow the server to
-choose an authentication mode. Unlike PSK-based authentication,
-however, authentication with PAKE cannot be combined with the
-normal TLS key exchange mechanism. Forward secrecy is provided by
-the PAKE itself.<a href="#section-4.1-11" class="pilcrow">¶</a></p>
-<p id="section-4.1-12">The server identity value provided in the PAKEClientHello structure
+<p id="section-4.1-11">If a client sends the <code>pake</code> extension, then it <span class="bcp14">MUST</span> also send a <code>supported_groups</code> and
+<code>key_share</code> extension. Like PSK-based authentication in psk_dhe_ke mode as defined in
+<span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.2.0" class="relref">Section 4.2.0</a> of [<a href="#TLS13" class="cite xref">TLS13</a>]</span>, authentication with the <code>pake</code> extension
+is always combined with the normal TLS key exchange mechanism. See <a href="#key-sched-mods" class="auto internal xref">Section 4.3</a> for details.<a href="#section-4.1-11" class="pilcrow">¶</a></p>
+<p id="section-4.1-12">Combining the <code>pake</code> extension with the normal TLS key exchange mechanism
+using a hybrid or PQ key agreement protects against Harvest Now Decrypt
+Later Attacks where traffic recorded today may be decrypted by a Cryptographically
+Relevant Quantum Computer (CRQC) in the future. However, if the PAKE used is not quantum secure,
+then an active quantum attacker may still break authentication.<a href="#section-4.1-12" class="pilcrow">¶</a></p>
+<p id="section-4.1-13">A client which sends both a <code>pake</code> and <code>signature_algorithms</code> extension indicates the client
+requires both PAKE authentication and standard server certificate authentication.<a href="#section-4.1-13" class="pilcrow">¶</a></p>
+<p id="section-4.1-14">The client <span class="bcp14">MAY</span> also send a <code>pre_shared_key</code> extension along with the <code>pake</code> extension,
+to allow the server to choose an authentication mode.<a href="#section-4.1-14" class="pilcrow">¶</a></p>
+<p id="section-4.1-15">The server identity value provided in the PAKEClientHello structure
 are disjoint from that which the client may provide in the
-ServerNameIndication (SNI) field.<a href="#section-4.1-12" class="pilcrow">¶</a></p>
+ServerNameIndication (SNI) field.<a href="#section-4.1-15" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="server-behavior">
@@ -1462,20 +1472,24 @@ struct {
 back the PAKE algorithm chosen and the server's PAKE message generated
 in response to the client's PAKE message.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
 <p id="section-4.2-7">If a server uses PAKE authentication, then it <span class="bcp14">MUST NOT</span> send an
-extension of type <code>key_share</code>, <code>pre_shared_key</code>, or <code>early_data</code>.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
-<p id="section-4.2-8">Use of PAKE authentication is not compatible with standard
-certificate-based authentication of both clients and servers. If use
-of a PAKE is negotiated, then servers <span class="bcp14">MUST NOT</span> include a Certificate,
-CertificateVerify, or CertificateRequest message in the handshake.<a href="#section-4.2-8" class="pilcrow">¶</a></p>
+extension of type <code>pre_shared_key</code>, or <code>early_data</code>.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
+<p id="section-4.2-8">Use of PAKE authentication <span class="bcp14">MAY</span> be used with
+certificate-based authentication of both clients and servers.
+If use of a PAKE is negotiated and the client included the <code>signature_algorithms</code> extension,
+then servers <span class="bcp14">MUST</span> include Certificate and CertificateVerify messages in the handshake.
+The server <span class="bcp14">MAY</span> send a CertificateRequest for client certificate authentication.
+See <a href="#security" class="auto internal xref">Section 8</a> for a discussion on different security considerations
+depending on if certificates are used or not.<a href="#section-4.2-8" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="key-schedule-modifications">
+<div id="key-sched-mods">
 <section id="section-4.3">
         <h3 id="name-key-schedule-modifications">
 <a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-key-schedule-modifications" class="section-name selfRef">Key Schedule Modifications</a>
         </h3>
 <p id="section-4.3-1">When the client and server agree on a PAKE to use, a shared secret derived
-from the PAKE protocol is used as the <code>ECDH(E)</code> input to the TLS 1.3
+from the PAKE protocol is concatenated with the regular <code>ECDH(E)</code>
+input and used as part of the <code>ECDH(E)</code> input to the TLS 1.3
 key schedule. Details for the shared secret computation are left to the
 specific PAKE algorithm. See <a href="#spake2plus" class="auto internal xref">Section 6</a> for information about how
 the SPAKE2+ variant operates.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
@@ -1541,7 +1555,7 @@ TLS must provide the following details:<a href="#section-5-1" class="pilcrow">¶
           <p id="section-5-2.4.1">How the PAKE protocol is executed based on those messages; and<a href="#section-5-2.4.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-5-2.5">
-          <p id="section-5-2.5.1">How the outputs of the PAKE protocol are used to populate the <code>(EC)DHE</code> input to the TLS key schedule.<a href="#section-5-2.5.1" class="pilcrow">¶</a></p>
+          <p id="section-5-2.5.1">How the outputs of the PAKE protocol are used to create the PAKE portion of the<code>(EC)DHE</code> input to the TLS key schedule.<a href="#section-5-2.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-5-3">In addition, to be compatible with the security requirements of TLS
@@ -1608,8 +1622,8 @@ The "Context" value for SPAKE2+ may be specified by the application to include a
 context in the protocol transcript or left empty. See <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3" class="relref">Section 3</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>. The rest of
 the values needed for the transcript derivation are as configured in <a href="#spake2plus-setup" class="auto internal xref">Section 6.1</a>,
 exchanged over the wire, or computed by client and server.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<p id="section-6.2-4">Using <code>K_main</code>, the client and server both compute <code>K_shared</code> which is used as
-input to the TLS 1.3 key schedule. Specifically, <code>K_shared</code> is used
+<p id="section-6.2-4">Using <code>K_main</code>, the client and server both compute <code>K_shared</code> which is combined with the
+<code>(EC)DHE</code> shared secret as input to the TLS 1.3 key schedule. Specifically, <code>K_shared || (EC)DHE</code> is used
 as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-7.1" class="relref">Section 7.1</a> of [<a href="#TLS13" class="cite xref">TLS13</a>]</span>, as shown below.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.2-5">
 <pre>
@@ -1626,8 +1640,8 @@ as the <code>(EC)DHE</code> input to the key schedule in <span><a href="https://
                               Derive-Secret(., "derived", "")
                                     |
                                     v
-                  K_shared -&gt; HKDF-Extract = Handshake Secret
-                  ^^^^^^^^          |
+                K_shared || (EC)DHE -&gt; HKDF-Extract = Handshake Secret
+                ^^^^^^^^^^^         |
                                     +-----&gt; Derive-Secret(...)
                                     +-----&gt; Derive-Secret(...)
                                     |
@@ -1648,7 +1662,7 @@ since it can do so within the structure of the TLS 1.3 handshake and the client 
 If verification of confirmV fails, clients <span class="bcp14">SHOULD</span> abort the handshake with a "decrypt_error" alert.
 The client and server do not additionally compute or verify confirmP
 as described in <span><a href="https://rfc-editor.org/rfc/rfc9383#section-3.4" class="relref">Section 3.4</a> of [<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span>.
-See <a href="#spake2plus-sec" class="auto internal xref">Section 8.3</a> for more information about the safety of this approach.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
+See <a href="#spake2plus-sec" class="auto internal xref">Section 8.4</a> for more information about the safety of this approach.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1718,18 +1732,34 @@ This is similar to the procedure outlined in <span>[<a href="#RFC5054" class="ci
 The simulation mechanism is described in <a href="#simulation" class="auto internal xref">Section 4.4</a>.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="spake2plus-sec">
+<div id="ramifications-of-low-entropy-secret-compromise">
 <section id="section-8.3">
-        <h3 id="name-spake2-security-considerati">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-spake2-security-considerati" class="section-name selfRef">SPAKE2+ Security Considerations</a>
+        <h3 id="name-ramifications-of-low-entrop">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-ramifications-of-low-entrop" class="section-name selfRef">Ramifications of low entropy secret compromise</a>
         </h3>
-<p id="section-8.3-1"><a href="#spake2plus" class="auto internal xref">Section 6</a> describes how to integrate SPAKE2+ into TLS using the <code>pake</code>
+<p id="section-8.3-1">As with PSK based authentication, if only PAKE authentication is in use,
+then an attacker that learns the low entropy secret could impersonate
+either the client or the server. In situations where a notion of stable identity
+is available, then Certificate based authentication <span class="bcp14">MAY</span> be used as well to
+reduce this risk. For example, requiring the server to authenticate with
+a certificate in addition to PAKE authentication means an attacker
+that learns the password could only impersonate a client not a server.
+This is an important distinction in situations where
+the client sends sensitive data to the server.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="spake2plus-sec">
+<section id="section-8.4">
+        <h3 id="name-spake2-security-considerati">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-spake2-security-considerati" class="section-name selfRef">SPAKE2+ Security Considerations</a>
+        </h3>
+<p id="section-8.4-1"><a href="#spake2plus" class="auto internal xref">Section 6</a> describes how to integrate SPAKE2+ into TLS using the <code>pake</code>
 extension in this document. This integration deviates from the SPAKE2+
 protocol in <span>[<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span> in one important way: the explicit key confirmation
 checks required in <span>[<a href="#SPAKE2PLUS" class="cite xref">SPAKE2PLUS</a>]</span> are replaced with the TLS Finished messages.
 This is because the TLS Finished messages compute a MAC over the TLS transcript,
-which includes both the <code>shareP</code> and <code>shareV</code> values exchanged for SPAKE2+.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
-<p id="section-8.3-2">[[OPEN ISSUE: this requires formal analysis to confirm.]]<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+which includes both the <code>shareP</code> and <code>shareV</code> values exchanged for SPAKE2+.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-2">[[OPEN ISSUE: this requires formal analysis to confirm.]]<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1842,7 +1872,7 @@ document.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <dl class="references">
 <dt id="CPACE">[CPACE]</dt>
         <dd>
-<span class="refAuthor">Abdalla, M.</span>, <span class="refAuthor">Haase, B.</span>, and <span class="refAuthor">J. Hesse</span>, <span class="refTitle">"CPace, a balanced composable PAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-cpace-13</span>, <time datetime="2024-10-14" class="refDate">14 October 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-cpace-13">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-cpace-13</a>&gt;</span>. </dd>
+<span class="refAuthor">Abdalla, M.</span>, <span class="refAuthor">Haase, B.</span>, and <span class="refAuthor">J. Hesse</span>, <span class="refTitle">"CPace, a balanced composable PAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-cpace-14</span>, <time datetime="2025-04-16" class="refDate">16 April 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-cpace-14">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-cpace-14</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -1879,7 +1909,7 @@ document.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <dl class="references">
 <dt id="ECH">[ECH]</dt>
         <dd>
-<span class="refAuthor">Rescorla, E.</span>, <span class="refAuthor">Oku, K.</span>, <span class="refAuthor">Sullivan, N.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"TLS Encrypted Client Hello"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tls-esni-22</span>, <time datetime="2024-09-15" class="refDate">15 September 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-22">https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-22</a>&gt;</span>. </dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refAuthor">Oku, K.</span>, <span class="refAuthor">Sullivan, N.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"TLS Encrypted Client Hello"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tls-esni-25</span>, <time datetime="2025-06-14" class="refDate">14 June 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-25">https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-25</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="FIRST-DRAFT">[FIRST-DRAFT]</dt>
         <dd>
