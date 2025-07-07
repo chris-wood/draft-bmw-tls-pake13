@@ -5,11 +5,11 @@
 Network Working Group                                          L. Bauman
 Internet-Draft                                               Apple, Inc.
 Intended status: Informational                               D. Benjamin
-Expires: 2 January 2026                                       Google LLC
+Expires: 8 January 2026                                       Google LLC
                                                                 S. Menon
                                                               C. A. Wood
                                                              Apple, Inc.
-                                                             1 July 2025
+                                                             7 July 2025
 
 
       A Password Authenticated Key Exchange Extension for TLS 1.3
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 January 2026.
+   This Internet-Draft will expire on 8 January 2026.
 
 Copyright Notice
 
@@ -244,8 +244,7 @@ Table of Contents
    mechanism using a hybrid or PQ key agreement protects against Harvest
    Now Decrypt Later Attacks where traffic recorded today may be
    decrypted by a Cryptographically Relevant Quantum Computer (CRQC) in
-   the future.  However, if the PAKE used is not quantum secure, then an
-   active quantum attacker may still break authentication.
+   the future.
 
    A client which sends both a pake and signature_algorithms extension
    indicates the client requires both PAKE authentication and standard
@@ -535,13 +534,13 @@ Table of Contents
    As with PSK based authentication, if only PAKE authentication is in
    use, then an attacker that learns the low entropy secret could
    impersonate either the client or the server.  In situations where a
-   notion of stable identity is available, then Certificate based
+   notion of stable identity is available, then certificate-based
    authentication MAY be used as well to reduce this risk.  For example,
    requiring the server to authenticate with a certificate in addition
    to PAKE authentication means an attacker that learns the password
-   could only impersonate a client not a server.  This is an important
-   distinction in situations where the client sends sensitive data to
-   the server.
+   could only impersonate a client to a server, but could not
+   impersonate a server to a client.  This is an important distinction
+   in situations where the client sends sensitive data to the server.
 
 8.4.  SPAKE2+ Security Considerations
 
