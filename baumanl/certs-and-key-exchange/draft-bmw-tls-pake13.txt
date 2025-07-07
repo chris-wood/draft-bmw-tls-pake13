@@ -87,6 +87,7 @@ Table of Contents
    9.  IANA Considerations
      9.1.  PAKE Scheme registry
    Acknowledgments
+   Change Log
    References
      Normative References
      Informative References
@@ -613,6 +614,14 @@ Acknowledgments
    The authors would like to thank the original authors of [FIRST-DRAFT]
    for providing a firm basis for the extension mechanism specified in
    this document.
+
+Change Log
+
+   Since draft-bmw-tls-pake13-01
+
+   *  Require standard TLS Key exchange to be combined with pake
+
+   *  Allow combining PAKEs and certificates
 
 References
 
