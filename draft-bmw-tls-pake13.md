@@ -349,7 +349,9 @@ the values needed for the transcript derivation are as configured in {{spake2plu
 exchanged over the wire, or computed by client and server.
 
 Using `K_main`, the client and server both compute `K_shared` which is combined with the
-`(EC)DHE` shared secret as input to the TLS 1.3 key schedule. Specifically, `K_shared || (EC)DHE` is used
+`(EC)DHE` shared secret as input to the TLS 1.3 key schedule, where the (EC)DHE shared
+secret is as specified in {{Section 7.1 of !TLS13=RFC8446}} or as the `concatenated_shared_secret`
+as specified in {{Section 3.3 of !I-D.ietf-tls-hybrid-design}}. Specifically, `K_shared || (EC)DHE` is used
 as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}}, as shown below.
 
 ~~~
