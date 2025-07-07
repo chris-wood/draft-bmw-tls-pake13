@@ -176,15 +176,24 @@ is that a valid ClientHello must satisfy at least one of the
 following options:
 
 * includes a `pre_shared_key` extension
-* includes both a `signature_algorithms` and `supported_groups` extensions
-* includes a `pake` extension
+* includes `signature_algorithms`, `supported_groups`, and `key_share`  extensions
+* includes `pake`, `supported_groups`, and `key_share` extensions
 
-If a client sends the `pake` extension, then it MAY also send the
-`key_share` and `pre_shared_key` extensions, to allow the server to
-choose an authentication mode. Unlike PSK-based authentication,
-however, authentication with PAKE cannot be combined with the
-normal TLS key exchange mechanism. Forward secrecy is provided by
-the PAKE itself.
+If a client sends the `pake` extension, then it MUST also send a `supported_groups` and
+`key_share` extension. Like PSK-based authentication in psk_dhe_ke mode as defined in
+{{Section 4.2.0 of !TLS13=RFC8446}}, authentication with the `pake` extension
+is always combined with the normal TLS key exchange mechanism. See {{key-sched-mods}} for details.
+
+Combining the `pake` extension with the normal TLS key exchange mechanism
+using a hybrid or PQ key agreement protects against Harvest Now Decrypt
+Later Attacks where traffic recorded today may be decrypted by a Cryptographically
+Relevant Quantum Computer (CRQC) in the future.
+
+A client which sends both a `pake` and `signature_algorithms` extension indicates the client
+requires both PAKE authentication and standard server certificate authentication.
+
+The client MAY also send a `pre_shared_key` extension along with the `pake` extension,
+to allow the server to choose an authentication mode.
 
 The server identity value provided in the PAKEClientHello structure
 are disjoint from that which the client may provide in the
@@ -228,17 +237,21 @@ back the PAKE algorithm chosen and the server's PAKE message generated
 in response to the client's PAKE message.
 
 If a server uses PAKE authentication, then it MUST NOT send an
-extension of type `key_share`, `pre_shared_key`, or `early_data`.
+extension of type `pre_shared_key`, or `early_data`.
 
-Use of PAKE authentication is not compatible with standard
-certificate-based authentication of both clients and servers. If use
-of a PAKE is negotiated, then servers MUST NOT include a Certificate,
-CertificateVerify, or CertificateRequest message in the handshake.
+Use of PAKE authentication MAY be used with
+certificate-based authentication of both clients and servers.
+If use of a PAKE is negotiated and the client included the `signature_algorithms` extension,
+then servers MUST include Certificate and CertificateVerify messages in the handshake.
+The server MAY send a CertificateRequest for client certificate authentication.
+See {{security}} for a discussion on different security considerations
+depending on if certificates are used or not.
 
-## Key Schedule Modifications
+## Key Schedule Modifications {#key-sched-mods}
 
 When the client and server agree on a PAKE to use, a shared secret derived
-from the PAKE protocol is used as the `ECDH(E)` input to the TLS 1.3
+from the PAKE protocol is concatenated with the regular `ECDH(E)`
+input and used as part of the `ECDH(E)` input to the TLS 1.3
 key schedule. Details for the shared secret computation are left to the
 specific PAKE algorithm. See {{spake2plus}} for information about how
 the SPAKE2+ variant operates.
@@ -281,7 +294,7 @@ TLS must provide the following details:
 * Content of the `pake_message` field in a ClientHello;
 * Content of the `pake_message` field in a ServerHello;
 * How the PAKE protocol is executed based on those messages; and
-* How the outputs of the PAKE protocol are used to populate the `(EC)DHE` input to the TLS key schedule.
+* How the outputs of the PAKE protocol are used to create the PAKE portion of the`(EC)DHE` input to the TLS key schedule.
 
 In addition, to be compatible with the security requirements of TLS
 1.3, PAKE protocols defined for use with TLS 1.3 MUST provide
@@ -335,8 +348,10 @@ context in the protocol transcript or left empty. See {{Section 3 of SPAKE2PLUS}
 the values needed for the transcript derivation are as configured in {{spake2plus-setup}},
 exchanged over the wire, or computed by client and server.
 
-Using `K_main`, the client and server both compute `K_shared` which is used as
-input to the TLS 1.3 key schedule. Specifically, `K_shared` is used
+Using `K_main`, the client and server both compute `K_shared` which is combined with the
+`(EC)DHE` shared secret as input to the TLS 1.3 key schedule, where the (EC)DHE shared
+secret is as specified in {{Section 7.1 of !TLS13=RFC8446}} or as the `concatenated_shared_secret`
+as specified in {{Section 3.3 of !I-D.ietf-tls-hybrid-design}}. Specifically, `K_shared || (EC)DHE` is used
 as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}}, as shown below.
 
 ~~~
@@ -353,8 +368,8 @@ as the `(EC)DHE` input to the key schedule in {{Section 7.1 of !TLS13=RFC8446}},
                               Derive-Secret(., "derived", "")
                                     |
                                     v
-                  K_shared -> HKDF-Extract = Handshake Secret
-                  ^^^^^^^^          |
+                K_shared || (EC)DHE -> HKDF-Extract = Handshake Secret
+                ^^^^^^^^^^^         |
                                     +-----> Derive-Secret(...)
                                     +-----> Derive-Secret(...)
                                     |
@@ -433,6 +448,18 @@ if an identity was recognized, but the password was incorrect.
 This is similar to the procedure outlined in {{?RFC5054}}.
 The simulation mechanism is described in {{simulation}}.
 
+## Ramifications of low entropy secret compromise
+
+As with PSK based authentication, if only PAKE authentication is in use,
+then an attacker that learns the low entropy secret could impersonate
+either the client or the server. In situations where a notion of stable identity
+is available, then certificate-based authentication MAY be used as well to
+reduce this risk. For example, requiring the server to authenticate with
+a certificate in addition to PAKE authentication means an attacker
+that learns the password could only impersonate a client to a server, but could not impersonate a server to a client.
+This is an important distinction in situations where
+the client sends sensitive data to the server.
+
 ## SPAKE2+ Security Considerations {#spake2plus-sec}
 
 {{spake2plus}} describes how to integrate SPAKE2+ into TLS using the `pake`
@@ -490,3 +517,11 @@ N =
 The authors would like to thank the original authors of {{FIRST-DRAFT}}
 for providing a firm basis for the extension mechanism specified in this
 document.
+
+# Change Log
+{:numbered="false"}
+
+Since draft-bmw-tls-pake13-01
+
+* Require standard TLS Key exchange to be combined with pake
+* Allow combining PAKEs and certificates
