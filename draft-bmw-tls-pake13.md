@@ -187,8 +187,7 @@ is always combined with the normal TLS key exchange mechanism. See {{key-sched-m
 Combining the `pake` extension with the normal TLS key exchange mechanism
 using a hybrid or PQ key agreement protects against Harvest Now Decrypt
 Later Attacks where traffic recorded today may be decrypted by a Cryptographically
-Relevant Quantum Computer (CRQC) in the future. However, if the PAKE used is not quantum secure,
-then an active quantum attacker may still break authentication.
+Relevant Quantum Computer (CRQC) in the future.
 
 A client which sends both a `pake` and `signature_algorithms` extension indicates the client
 requires both PAKE authentication and standard server certificate authentication.
@@ -452,10 +451,10 @@ The simulation mechanism is described in {{simulation}}.
 As with PSK based authentication, if only PAKE authentication is in use,
 then an attacker that learns the low entropy secret could impersonate
 either the client or the server. In situations where a notion of stable identity
-is available, then Certificate based authentication MAY be used as well to
+is available, then certificate-based authentication MAY be used as well to
 reduce this risk. For example, requiring the server to authenticate with
 a certificate in addition to PAKE authentication means an attacker
-that learns the password could only impersonate a client not a server.
+that learns the password could only impersonate a client to a server, but could not impersonate a server to a client.
 This is an important distinction in situations where
 the client sends sensitive data to the server.
 
