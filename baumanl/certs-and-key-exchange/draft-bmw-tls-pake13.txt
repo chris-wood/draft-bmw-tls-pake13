@@ -429,8 +429,11 @@ Table of Contents
 
    Using K_main, the client and server both compute K_shared which is
    combined with the (EC)DHE shared secret as input to the TLS 1.3 key
-   schedule.  Specifically, K_shared || (EC)DHE is used as the (EC)DHE
-   input to the key schedule in Section 7.1 of [TLS13], as shown below.
+   schedule, where the (EC)DHE shared secret is as specified in
+   Section 7.1 of [TLS13] or as the concatenated_shared_secret as
+   specified in Section 3.3 of [I-D.ietf-tls-hybrid-design].
+   Specifically, K_shared || (EC)DHE is used as the (EC)DHE input to the
+   key schedule in Section 7.1 of [TLS13], as shown below.
 
                                       0
                                       |
@@ -620,6 +623,13 @@ Normative References
               irtf-cfrg-cpace-14, 16 April 2025,
               <https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-
               cpace-14>.
+
+   [I-D.ietf-tls-hybrid-design]
+              Stebila, D., Fluhrer, S., and S. Gueron, "Hybrid key
+              exchange in TLS 1.3", Work in Progress, Internet-Draft,
+              draft-ietf-tls-hybrid-design-13, 17 June 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
+              hybrid-design-13>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
