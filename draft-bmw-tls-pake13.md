@@ -517,3 +517,11 @@ N =
 The authors would like to thank the original authors of {{FIRST-DRAFT}}
 for providing a firm basis for the extension mechanism specified in this
 document.
+
+# Change Log
+{:numbered="false"}
+
+Since draft-bmw-tls-pake13-01
+
+* Require standard TLS Key exchange to be combined with pake
+* Allow combining PAKEs and certificates
