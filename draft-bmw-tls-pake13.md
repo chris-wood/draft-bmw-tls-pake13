@@ -78,7 +78,7 @@ knowledge of the password or PAKE-specific values derived from the
 password (e.g. augmented PAKEs only require one party to know the
 actual password). The choice of PAKE and any required parameters will
 be explicitly specified using IANA assigned values.
-This document defines a concrete protocol for executing the
+This document defines concrete protocols for executing the
 SPAKE2+ {{!RFC9383}} and CPACE {{!CPACE=I-D.irtf-cfrg-cpace}} PAKE protocols.
 
 # Terminology
