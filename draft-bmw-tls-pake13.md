@@ -77,9 +77,9 @@ prior to the TLS handshake the client and server will both have
 knowledge of the password or PAKE-specific values derived from the
 password (e.g. augmented PAKEs only require one party to know the
 actual password). The choice of PAKE and any required parameters will
-be explicitly specified using IANA assigned values. As a first
-case, this document defines a concrete protocol for executing the
-SPAKE2+ PAKE protocol {{!RFC9383}}.
+be explicitly specified using IANA assigned values.
+This document defines concrete protocols for executing the
+SPAKE2+ {{!RFC9383}} and CPACE {{!CPACE=I-D.irtf-cfrg-cpace}} PAKE protocols.
 
 # Terminology
 
@@ -253,8 +253,8 @@ When the client and server agree on a PAKE to use, a shared secret derived
 from the PAKE protocol is concatenated with the regular `ECDH(E)`
 input and used as part of the `ECDH(E)` input to the TLS 1.3
 key schedule. Details for the shared secret computation are left to the
-specific PAKE algorithm. See {{spake2plus}} for information about how
-the SPAKE2+ variant operates.
+specific PAKE algorithm. See {{spake2plus}} and {{cpace}} for information about how
+the SPAKE2+ and CPace variants operate, respectively.
 
 As with client authentication via certificates, the server has not
 authenticated the client until after it has received the client's
@@ -392,6 +392,48 @@ The client and server do not additionally compute or verify confirmP
 as described in {{Section 3.4 of SPAKE2PLUS}}.
 See {{spake2plus-sec}} for more information about the safety of this approach.
 
+# CPace Integration {#cpace}
+
+This section describes the CPace instantiation of the `pake` extension for TLS.
+The CPace protocol is described in {{!CPACE=I-D.irtf-cfrg-cpace}}.
+{{cpace-setup}} describes the setup required before the protocol runs, and
+{{cpace-run}} describes the protocol execution in TLS.
+
+## Protocol Setup {#cpace-setup}
+
+The TLS client and server roles map to the 'initiator' and 'responder' roles in
+the CPace specification, respectively. The client and server must share a
+password-related string (PRS). The associated data for both parties (`ADa` and
+`ADb`) is unused. The client and server may optionally be configured with party
+identification strings, a channel identifier, and/or a session identifier, as
+described in {{Section 3.1 of !CPACE=I-D.irtf-cfrg-cpace}}.
+
+The PAKEScheme value for CPace specifies a cipher suite for the protocol,
+consisting of a group environment `G` and cryptographic hash function `H`.
+
+## Protocol Execution {#cpace-run}
+
+The content of one PAKEShare value in the PAKEClientHello structure consists of
+the PAKEScheme value `CPACE_X25519_SHA512` and the value `Ya` as computed in
+{{Section 6.2 of !CPACE=I-D.irtf-cfrg-cpace}}.
+
+The content of the server PAKEShare value in the PAKEServerHello structure
+consists of the PAKEScheme value `CPACE_X25519_SHA512` and the value `Yb` as
+computed in {{Section 6.2 of !CPACE=I-D.irtf-cfrg-cpace}}.
+
+Given `Ya` and `Yb`, the client and server can then both compute `ISK`, the main output
+secret of the protocol as described in {{Section 6.2 of !CPACE=I-D.irtf-cfrg-cpace}}.
+The various optional CPace inputs (party identification strings, channel
+identifiers, and session identifiers) may be specified by the application, and
+will contribute to the derivation of `ISK`.
+
+The client and server both combine `ISK` with the `(EC)DHE` shared secret as
+input to the TLS 1.3 key schedule, where the (EC)DHE shared secret is as
+specified in {{Section 7.1 of !TLS13=RFC8446}} or as the
+`concatenated_shared_secret` as specified in {{Section 3.3 of !I-D.ietf-tls-hybrid-design}}.
+Specifically, `ISK || (EC)DHE` is used as the `(EC)DHE` input to the key
+schedule in {{Section 7.1 of !TLS13=RFC8446}}, as shown above in {{spake2plus-run}}.
+
 # Privacy Considerations {#privacy}
 
 Client and server identities are sent in the clear in the PAKEClientHello extension.
@@ -471,6 +513,12 @@ which includes both the `shareP` and `shareV` values exchanged for SPAKE2+.
 
 [[OPEN ISSUE: this requires formal analysis to confirm.]]
 
+## CPace Security Considerations {#cpace-sec}
+
+{{cpace}} describes how to integrate CPace into TLS using the `pake`
+extension in this document. Key confirmation is provided via TLS 1.3 Finished messages,
+satisfying the requirements in {{Section 9.4 of !CPACE=I-D.irtf-cfrg-cpace}}.
+
 # IANA Considerations
 
 This document requests that IANA add a value to the TLS
@@ -492,6 +540,7 @@ This document requests that IANA create a new registry called
 | Value   | PAKEScheme | Reference | Notes |
 |:--------|:-----------|:---------:|:------|
 | 0xTODO  | SPAKE2PLUS_V1 | (this document) | N/A |
+| 0xTODO  | CPACE_X25519_SHA512 | (this document) | N/A |
 
 The SPAKE2PLUS_V1 PAKEScheme variant has the following parameters associated with it:
 
@@ -511,6 +560,9 @@ N =
 03d8bbd6c639c62937b04d997f38c3770719c629d7014d49a24b4f98baa1292b49
 ~~~
 
+The CPACE_X25519_SHA512 PAKEScheme variant has the parameters for 'CPACE-X25519-SHA512'
+as specified in {{Section 4 of !CPACE=I-D.irtf-cfrg-cpace}}.
+
 # Acknowledgments
 {:numbered="false"}
 
@@ -520,6 +572,10 @@ document.
 
 # Change Log
 {:numbered="false"}
+
+Since draft-bmw-tls-pake13-02
+
+* Add CPace
 
 Since draft-bmw-tls-pake13-01
 
