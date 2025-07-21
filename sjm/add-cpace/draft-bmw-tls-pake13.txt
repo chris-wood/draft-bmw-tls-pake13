@@ -135,7 +135,7 @@ Table of Contents
    password (e.g. augmented PAKEs only require one party to know the
    actual password).  The choice of PAKE and any required parameters
    will be explicitly specified using IANA assigned values.  This
-   document defines a concrete protocol for executing the SPAKE2+
+   document defines concrete protocols for executing the SPAKE2+
    [RFC9383] and CPACE [CPACE] PAKE protocols.
 
 2.  Terminology
