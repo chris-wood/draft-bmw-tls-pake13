@@ -1,11 +1,14 @@
 ---
 title: A Password Authenticated Key Exchange Extension for TLS 1.3
 abbrev: TLS 1.3 PAKE
-docname: draft-bmw-tls-pake13-latest
+docname: draft-ietf-tls-pake-latest
+submissiontype: IETF
 category: info
 
 ipr: trust200902
 area: Security
+workgroup: "Transport Layer Security"
+v: 0
 keyword: Internet-Draft
 
 stand_alone: yes
@@ -520,6 +523,10 @@ document.
 
 # Change Log
 {:numbered="false"}
+
+Since draft-bmw-tls-pake13-02
+
+* Updated boilerplate after WG adoption
 
 Since draft-bmw-tls-pake13-01
 
