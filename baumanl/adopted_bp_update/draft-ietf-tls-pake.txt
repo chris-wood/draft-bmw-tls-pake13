@@ -2,18 +2,18 @@
 
 
 
-Network Working Group                                          L. Bauman
+Transport Layer Security                                       L. Bauman
 Internet-Draft                                               Apple, Inc.
 Intended status: Informational                               D. Benjamin
-Expires: 22 January 2026                                      Google LLC
+Expires: 7 March 2026                                         Google LLC
                                                                 S. Menon
                                                               C. A. Wood
                                                              Apple, Inc.
-                                                            21 July 2025
+                                                        3 September 2025
 
 
       A Password Authenticated Key Exchange Extension for TLS 1.3
-                      draft-bmw-tls-pake13-latest
+                       draft-ietf-tls-pake-latest
 
 Abstract
 
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 January 2026.
+   This Internet-Draft will expire on 7 March 2026.
 
 Copyright Notice
 
@@ -78,18 +78,14 @@ Table of Contents
    6.  SPAKE2+ Integration
      6.1.  Protocol Setup
      6.2.  Protocol Execution
-   7.  CPace Integration
-     7.1.  Protocol Setup
-     7.2.  Protocol Execution
-   8.  Privacy Considerations
-   9.  Security Considerations
-     9.1.  Dictionary attack mitigation
-     9.2.  Protection of client identities
-     9.3.  Ramifications of low entropy secret compromise
-     9.4.  SPAKE2+ Security Considerations
-     9.5.  CPace Security Considerations
-   10. IANA Considerations
-     10.1.  PAKE Scheme registry
+   7.  Privacy Considerations
+   8.  Security Considerations
+     8.1.  Dictionary attack mitigation
+     8.2.  Protection of client identities
+     8.3.  Ramifications of low entropy secret compromise
+     8.4.  SPAKE2+ Security Considerations
+   9.  IANA Considerations
+     9.1.  PAKE Scheme registry
    Acknowledgments
    Change Log
    References
@@ -101,8 +97,8 @@ Table of Contents
 
    DISCLAIMER: Much of this text is copied from [FIRST-DRAFT] and is in
    the process of being updated.  This is a work-in-progress draft and
-   has not yet seen significant security analysis.  See Section 9 and
-   Section 9.4 for more information.
+   has not yet seen significant security analysis.  See Section 8 and
+   Section 8.4 for more information.
 
    In some applications, it is desirable to enable a client and server
    to authenticate to one another using a low-entropy pre-shared value,
@@ -134,9 +130,9 @@ Table of Contents
    knowledge of the password or PAKE-specific values derived from the
    password (e.g. augmented PAKEs only require one party to know the
    actual password).  The choice of PAKE and any required parameters
-   will be explicitly specified using IANA assigned values.  This
-   document defines concrete protocols for executing the SPAKE2+
-   [RFC9383] and CPACE [CPACE] PAKE protocols.
+   will be explicitly specified using IANA assigned values.  As a first
+   case, this document defines a concrete protocol for executing the
+   SPAKE2+ PAKE protocol [RFC9383].
 
 2.  Terminology
 
@@ -213,7 +209,7 @@ Table of Contents
       protocol.
 
    The client and server identity fields are common to all PAKEShares to
-   prevent client enumeration attacks; see Section 9.
+   prevent client enumeration attacks; see Section 8.
 
    The PAKEScheme field in the PAKEShare allows implementations to
    support multiple PAKEs and negotiate which to use in the context of
@@ -284,7 +280,7 @@ Table of Contents
    request corresponds to a legitimate client registration record.  If
    one does not exist, the server MAY simulate a PAKE response as
    described in Section 4.4.  Simulating a response prevents client
-   enumeration attacks on the server's PAKE database; see Section 9.
+   enumeration attacks on the server's PAKE database; see Section 8.
 
    If there exists a valid PAKE registration, the server indicates its
    selection by including a pake extension in its ServerHello.  The
@@ -309,7 +305,7 @@ Table of Contents
    extension, then servers MUST include Certificate and
    CertificateVerify messages in the handshake.  The server MAY send a
    CertificateRequest for client certificate authentication.  See
-   Section 9 for a discussion on different security considerations
+   Section 8 for a discussion on different security considerations
    depending on if certificates are used or not.
 
 4.3.  Key Schedule Modifications
@@ -318,9 +314,8 @@ Table of Contents
    derived from the PAKE protocol is concatenated with the regular
    ECDH(E) input and used as part of the ECDH(E) input to the TLS 1.3
    key schedule.  Details for the shared secret computation are left to
-   the specific PAKE algorithm.  See Section 6 and Section 7 for
-   information about how the SPAKE2+ and CPace variants operate,
-   respectively.
+   the specific PAKE algorithm.  See Section 6 for information about how
+   the SPAKE2+ variant operates.
 
    As with client authentication via certificates, the server has not
    authenticated the client until after it has received the client's
@@ -476,56 +471,10 @@ Table of Contents
    verification of confirmV fails, clients SHOULD abort the handshake
    with a "decrypt_error" alert.  The client and server do not
    additionally compute or verify confirmP as described in Section 3.4
-   of [SPAKE2PLUS].  See Section 9.4 for more information about the
+   of [SPAKE2PLUS].  See Section 8.4 for more information about the
    safety of this approach.
 
-7.  CPace Integration
-
-   This section describes the CPace instantiation of the pake extension
-   for TLS.  The CPace protocol is described in [CPACE].  Section 7.1
-   describes the setup required before the protocol runs, and
-   Section 7.2 describes the protocol execution in TLS.
-
-7.1.  Protocol Setup
-
-   The TLS client and server roles map to the 'initiator' and
-   'responder' roles in the CPace specification, respectively.  The
-   client and server must share a password-related string (PRS).  The
-   associated data for both parties (ADa and ADb) is unused.  The client
-   and server may optionally be configured with party identification
-   strings, a channel identifier, and/or a session identifier, as
-   described in Section 3.1 of [CPACE].
-
-   The PAKEScheme value for CPace specifies a cipher suite for the
-   protocol, consisting of a group environment G and cryptographic hash
-   function H.
-
-7.2.  Protocol Execution
-
-   The content of one PAKEShare value in the PAKEClientHello structure
-   consists of the PAKEScheme value CPACE_X25519_SHA512 and the value Ya
-   as computed in Section 6.2 of [CPACE].
-
-   The content of the server PAKEShare value in the PAKEServerHello
-   structure consists of the PAKEScheme value CPACE_X25519_SHA512 and
-   the value Yb as computed in Section 6.2 of [CPACE].
-
-   Given Ya and Yb, the client and server can then both compute ISK, the
-   main output secret of the protocol as described in Section 6.2 of
-   [CPACE].  The various optional CPace inputs (party identification
-   strings, channel identifiers, and session identifiers) may be
-   specified by the application, and will contribute to the derivation
-   of ISK.
-
-   The client and server both combine ISK with the (EC)DHE shared secret
-   as input to the TLS 1.3 key schedule, where the (EC)DHE shared secret
-   is as specified in Section 7.1 of [TLS13] or as the
-   concatenated_shared_secret as specified in Section 3.3 of
-   [I-D.ietf-tls-hybrid-design].  Specifically, ISK || (EC)DHE is used
-   as the (EC)DHE input to the key schedule in Section 7.1 of [TLS13],
-   as shown above in Section 6.2.
-
-8.  Privacy Considerations
+7.  Privacy Considerations
 
    Client and server identities are sent in the clear in the
    PAKEClientHello extension.  While normally the TLS server identity is
@@ -544,9 +493,9 @@ Table of Contents
    Encrypted ClientHello (ECH) extension to encrypt the PAKEClientHello
    extension in transit to the server [ECH].
 
-9.  Security Considerations
+8.  Security Considerations
 
-9.1.  Dictionary attack mitigation
+8.1.  Dictionary attack mitigation
 
    Because PAKE security is based on knowledge of a low-entropy secret,
    an attacker can perform a "dictionary attack" by repeatedly
@@ -566,7 +515,7 @@ Table of Contents
    Finished message, the authentication attempt MAY be treated as
    successful.
 
-9.2.  Protection of client identities
+8.2.  Protection of client identities
 
    Many of the security properties of this protocol will derive from the
    PAKE protocol being used.  Security considerations for PAKE protocols
@@ -584,7 +533,7 @@ Table of Contents
    similar to the procedure outlined in [RFC5054].  The simulation
    mechanism is described in Section 4.4.
 
-9.3.  Ramifications of low entropy secret compromise
+8.3.  Ramifications of low entropy secret compromise
 
    As with PSK based authentication, if only PAKE authentication is in
    use, then an attacker that learns the low entropy secret could
@@ -597,7 +546,7 @@ Table of Contents
    impersonate a server to a client.  This is an important distinction
    in situations where the client sends sensitive data to the server.
 
-9.4.  SPAKE2+ Security Considerations
+8.4.  SPAKE2+ Security Considerations
 
    Section 6 describes how to integrate SPAKE2+ into TLS using the pake
    extension in this document.  This integration deviates from the
@@ -609,14 +558,7 @@ Table of Contents
 
    [[OPEN ISSUE: this requires formal analysis to confirm.]]
 
-9.5.  CPace Security Considerations
-
-   Section 7 describes how to integrate CPace into TLS using the pake
-   extension in this document.  Key confirmation is provided via TLS 1.3
-   Finished messages, satisfying the requirements in Section 9.4 of
-   [CPACE].
-
-10.  IANA Considerations
+9.  IANA Considerations
 
    This document requests that IANA add a value to the TLS ExtensionType
    Registry with the following contents:
@@ -633,18 +575,16 @@ Table of Contents
    value assigned by IANA, and replace "(this document)" with the RFC
    number assigned to this document. ]]
 
-10.1.  PAKE Scheme registry
+9.1.  PAKE Scheme registry
 
    This document requests that IANA create a new registry called "PAKE
    Schemes" with the following contents:
 
-        +========+=====================+=================+=======+
-        | Value  | PAKEScheme          |    Reference    | Notes |
-        +========+=====================+=================+=======+
-        | 0xTODO | SPAKE2PLUS_V1       | (this document) | N/A   |
-        +--------+---------------------+-----------------+-------+
-        | 0xTODO | CPACE_X25519_SHA512 | (this document) | N/A   |
-        +--------+---------------------+-----------------+-------+
+           +========+===============+=================+=======+
+           | Value  | PAKEScheme    |    Reference    | Notes |
+           +========+===============+=================+=======+
+           | 0xTODO | SPAKE2PLUS_V1 | (this document) | N/A   |
+           +--------+---------------+-----------------+-------+
 
                                  Table 2
 
@@ -669,9 +609,6 @@ Table of Contents
    N =
    03d8bbd6c639c62937b04d997f38c3770719c629d7014d49a24b4f98baa1292b49
 
-   The CPACE_X25519_SHA512 PAKEScheme variant has the parameters for
-   'CPACE-X25519-SHA512' as specified in Section 4 of [CPACE].
-
 Acknowledgments
 
    The authors would like to thank the original authors of [FIRST-DRAFT]
@@ -682,7 +619,7 @@ Change Log
 
    Since draft-bmw-tls-pake13-02
 
-   *  Add CPace
+   *  Updated boilerplate after WG adoption
 
    Since draft-bmw-tls-pake13-01
 
@@ -703,9 +640,9 @@ Normative References
    [I-D.ietf-tls-hybrid-design]
               Stebila, D., Fluhrer, S., and S. Gueron, "Hybrid key
               exchange in TLS 1.3", Work in Progress, Internet-Draft,
-              draft-ietf-tls-hybrid-design-14, 21 July 2025,
+              draft-ietf-tls-hybrid-design-15, 3 September 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
-              hybrid-design-14>.
+              hybrid-design-15>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
