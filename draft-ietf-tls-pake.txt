@@ -2,18 +2,18 @@
 
 
 
-Network Working Group                                          L. Bauman
+Transport Layer Security                                       L. Bauman
 Internet-Draft                                               Apple, Inc.
 Intended status: Informational                               D. Benjamin
-Expires: 8 January 2026                                       Google LLC
+Expires: 7 March 2026                                         Google LLC
                                                                 S. Menon
                                                               C. A. Wood
                                                              Apple, Inc.
-                                                             7 July 2025
+                                                        3 September 2025
 
 
       A Password Authenticated Key Exchange Extension for TLS 1.3
-                      draft-bmw-tls-pake13-latest
+                       draft-ietf-tls-pake-latest
 
 Abstract
 
@@ -48,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 January 2026.
+   This Internet-Draft will expire on 7 March 2026.
 
 Copyright Notice
 
@@ -617,6 +617,10 @@ Acknowledgments
 
 Change Log
 
+   Since draft-bmw-tls-pake13-02
+
+   *  Updated boilerplate after WG adoption
+
    Since draft-bmw-tls-pake13-01
 
    *  Require standard TLS Key exchange to be combined with pake
@@ -636,9 +640,9 @@ Normative References
    [I-D.ietf-tls-hybrid-design]
               Stebila, D., Fluhrer, S., and S. Gueron, "Hybrid key
               exchange in TLS 1.3", Work in Progress, Internet-Draft,
-              draft-ietf-tls-hybrid-design-13, 17 June 2025,
+              draft-ietf-tls-hybrid-design-15, 3 September 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
-              hybrid-design-13>.
+              hybrid-design-15>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
