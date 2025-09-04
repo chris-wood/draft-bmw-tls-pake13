@@ -8,6 +8,13 @@ category: info
 ipr: trust200902
 area: Security
 workgroup: "Transport Layer Security"
+venue:
+    group: "Transport Layer Security"
+    type: "Working Group"
+    mail: "tls@ietf.org"
+    arch: "https://mailarchive.ietf.org/arch/browse/tls/"
+    github: "tlswg/tls-pake"
+    latest: "https://tlswg.org/tls-pake/draft-ietf-tls-pake.html"
 v: 0
 keyword: Internet-Draft
 
